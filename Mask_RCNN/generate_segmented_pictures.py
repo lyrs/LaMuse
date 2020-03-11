@@ -53,28 +53,37 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
-path = '../BaseImages/'
+def generate_images(source_path, destination_path):
 
-for particular_path in os.listdir(path):
-    if particular_path != '.DS_Store':
-        print('Dossier ' + particular_path + ' :')
-        if particular_path != 'paysages décors fonds' and particular_path != "architecture" and particular_path != "avions et objets volants":
-            os.mkdir("../CropedAndVectorizedImages./"+ particular_path+ "/")
-            compteur = 0
-            for filename in os.listdir(path + '/' + particular_path):
-                img = load_img(path + '/' + particular_path + '/' + filename)
-                original_image = load_img(path + '/' + particular_path + '/' + filename)
-                img = img_to_array(img)
-                results = model.detect([img], verbose=0, probability_criteria= 0.88)
-                r = results[0]
-                vectorized_image = Image.new("RGBA",original_image.size, 0)
+    assert source_path != ""
 
-                if r['class_ids'].size >0: 
-                    for height in range(r['masks'][:,:,0].shape[0]):
-                        for width in range(r['masks'][:,:,0].shape[1]):
-                            if r['masks'][height ,width , 0]:
-                                vectorized_image.putpixel((width, height), original_image.getpixel((width, height)))
-                    boxes_dimensions = r['rois'][0]
-                    # Good dimensions crop([1], [0] [3] [2]) !
-                    vectorized_image.crop((boxes_dimensions[1], boxes_dimensions[0],boxes_dimensions[3],boxes_dimensions[2])).save("../CropedAndVectorizedImages./"+ particular_path+ "/" + class_names[r['class_ids'][0]] + str(compteur) + ".png")
-                    compteur += 1
+
+    for particular_path in os.listdir(source_path):
+        if particular_path != '.DS_Store':
+            print('Dossier ' + particular_path + ' :')
+            if particular_path != 'paysages décors fonds' and particular_path != "architecture" and particular_path != "avions et objets volants":
+                os.mkdir(destination_path + particular_path+ "/")
+                compteur = 0
+                for filename in os.listdir(source_path + '/' + particular_path):
+                    
+                    img = load_img(source_path + '/' + particular_path + '/' + filename)
+                    original_image = load_img(source_path + '/' + particular_path + '/' + filename)
+                    
+                    img = img_to_array(img)
+
+                    results = model.detect([img], verbose=0, probability_criteria= 0.88)
+                    r = results[0]
+                    
+                    vectorized_image = Image.new("RGBA",original_image.size, 0)
+
+                    if r['class_ids'].size >0: 
+                        for height in range(r['masks'][:,:,0].shape[0]):
+                            for width in range(r['masks'][:,:,0].shape[1]):
+                                if r['masks'][height ,width , 0]:
+                                    vectorized_image.putpixel((width, height), original_image.getpixel((width, height)))
+                        boxes_dimensions = r['rois'][0]
+                        # Good dimensions crop([1], [0] [3] [2]) !
+                        vectorized_image.crop((boxes_dimensions[1], boxes_dimensions[0],boxes_dimensions[3],boxes_dimensions[2])).save(destination_path+ particular_path+ "/" + class_names[r['class_ids'][0]] + str(compteur) + ".png")
+                        compteur += 1
+
+generate_images("../BaseImages/", "../CropedAndVectorizedImages./")
