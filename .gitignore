@@ -1,0 +1,4 @@
+.DS_Store
+__pycache__
+Resultats/Archive.zip
+Mask_RCNN/mask_rcnn_coco.h5
