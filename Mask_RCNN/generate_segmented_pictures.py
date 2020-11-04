@@ -80,22 +80,27 @@ def generate_images(source_path: str, destination_path: str) -> None:
 
         img = img_to_array(img)
 
-        # Detecting known classes with RCNN model in current image img
+        # Detecting known classes with RCNN model in image list [img]
         results = model.detect([img], verbose=0, probability_criteria=0.7)
+        # Since image list contains only one element, the results array contains only one result
         r = results[0]
 
-        vectorized_image = Image.new("RGBA", original_image.size, 0)
-
         if r['class_ids'].size > 0:
-            for height in range(r['masks'][:, :, 0].shape[0]):
-                for width in range(r['masks'][:, :, 0].shape[1]):
-                    if r['masks'][height, width, 0]:
-                        vectorized_image.putpixel((width, height), original_image.getpixel((width, height)))
-            boxes_dimensions = r['rois'][0]
-            # Good dimensions crop([1], [0] [3] [2]) !
-            vectorized_image.crop(
-                (boxes_dimensions[1], boxes_dimensions[0], boxes_dimensions[3], boxes_dimensions[2])).save(
-                destination_path + "/" + class_names[r['class_ids'][0]] + str(compteur) + ".png")
+
+            for obj_idx in range(len(r['rois'])):
+
+                vectorized_image = Image.new("RGBA", original_image.size, 0)
+
+                for height in range(r['masks'][:, :, 0].shape[0]):
+                    for width in range(r['masks'][:, :, 0].shape[1]):
+                        if r['masks'][height, width, 0]:
+                            vectorized_image.putpixel((width, height), original_image.getpixel((width, height)))
+                boxes_dimensions = r['rois'][obj_idx]
+                # Good dimensions crop([1], [0] [3] [2]) !
+                vectorized_image.crop(
+                    (boxes_dimensions[1], boxes_dimensions[0], boxes_dimensions[3], boxes_dimensions[2])).save(
+                    destination_path + "/" + class_names[r['class_ids'][obj_idx]] + str(compteur) + "_" + str(obj_idx) + ".png")
+
             compteur += 1
 
 
