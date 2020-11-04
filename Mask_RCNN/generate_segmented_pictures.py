@@ -32,6 +32,11 @@ class myMaskRCNNConfig(Config):
     NUM_CLASSES = 1 + 80
 
 
+#
+#    def __init__(self):
+#        super(Config, self).__init__()
+#
+
 config = myMaskRCNNConfig()
 
 print("loading  weights for Mask R-CNN model…")
@@ -56,7 +61,9 @@ class_names = ['BG', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
                'teddy bear', 'hair drier', 'toothbrush']
 
 
-def generate_images(source_path, destination_path):
+##
+##
+def generate_images(source_path: str, destination_path: str) -> None:
     assert source_path != ""
     assert destination_path != ""
 
@@ -65,12 +72,15 @@ def generate_images(source_path, destination_path):
 
     compteur = 0
 
+    # Iterate over all files in source_path
+    # @Todo : verify that all files are effectively images, handle errors
     for filename in os.listdir(source_path):
         img = load_img(source_path + '/' + filename)
         original_image = load_img(source_path + '/' + filename)
 
         img = img_to_array(img)
 
+        # Detecting known classes with RCNN model in current image img
         results = model.detect([img], verbose=0, probability_criteria=0.7)
         r = results[0]
 
@@ -90,4 +100,12 @@ def generate_images(source_path, destination_path):
 
 
 if __name__ == "__main__":
-    generate_images("../BaseImages/objets", "../NouvelEssai")
+    parser = argparse.ArgumentParser(prog="generate_segmented_pictures",
+                                     description='Extract objects from the images provided in the input directory and store the resulting segmented images in the output directory.')
+    parser.add_argument("input_dir", metavar='in', type=str, nargs='?', help='input directory', default='./')
+    parser.add_argument("output_dir", metavar='out', type=str, nargs='?',
+                        help='output directory (defaults to input_dir if non specified)')
+
+    args = parser.parse_args()
+    print(args)
+    generate_images(args.input_dir, args.output_dir if args.output_dir else args.input_dir)
