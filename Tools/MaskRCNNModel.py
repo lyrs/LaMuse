@@ -1,5 +1,5 @@
-from mrcnn.config import Config
-from mrcnn import model as modellib
+from Mask_RCNN.mrcnn.config import Config
+from Mask_RCNN.mrcnn import model as modellib
 
 
 class MaskRCNNModel:

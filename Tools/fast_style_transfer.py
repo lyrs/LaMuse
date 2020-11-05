@@ -1,3 +1,8 @@
+import numpy as np
+import tensorflow as tf
+import tensorflow_hub as tf_hub
+import PIL
+
 
 def tensor_to_image(tensor):
     tensor = tensor * 255
@@ -29,7 +34,7 @@ def save_image(path_content: str, path_style: str, path_to_save: str) -> None:
     content = load_img(path_content)
     style = load_img(path_style)
 
-    hub_module = hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
+    hub_module = tf_hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
 
     content_modified = tf.constant(content)
     style_modified = tf.constant(style)

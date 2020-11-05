@@ -1,5 +1,5 @@
 import PySimpleGUI as sg
-from generate_segmented_pictures import generate_images
+from Tools.generate_segmented_pictures import generate_images
 
 sg.theme('DarkAmber')
 
