@@ -1,6 +1,9 @@
 from glob import glob
+import numpy as np
+from matplotlib import pyplot as plt
 
 from Tools.MaskRCNNModel import MaskRCNNModel
+from Mask_RCNN.mrcnn.visualize import display_instances
 import argparse
 import os
 from PIL import Image
@@ -9,15 +12,22 @@ from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
 
-##
-#   generate_images iterates over all images in source_path and generates masks of detected objects in destination_path
-##
 def generate_images(source_path: str, destination_path: str) -> None:
+    """
+    :param source_path: top level directory path in which to recursively select all images
+    :param destination_path: destination path in which to generate image masks of detected objects
+    :return:
+
+    generate_images recursively iterates over all images in source_path and generates masks of detected objects
+    in destination_path.
+
+    If destination_path: does not exist it is created.
+    """
     assert source_path != ""
     assert destination_path != ""
 
     image_extensions = ["jpg", "gif", "png", "tga"]
-    image_list = [y for x in [glob(source_path + '/*.%s' % ext) for ext in image_extensions] for y in x]
+    image_list = [y for x in [glob(source_path + '/**/*.%s' % ext, recursive=True) for ext in image_extensions] for y in x]
 
     if not os.path.exists(destination_path):
         os.mkdir(destination_path)
@@ -41,27 +51,62 @@ def generate_images(source_path: str, destination_path: str) -> None:
         # @Todo: make min_area run-time parameter
         min_area = 500
 
+        # @Todo: consider taking into account a selection threshold on r['scores']
+
+        ##
+        # print('Trying to plot')
+        # a_, ax = plt.subplots(1)
+        # plt.ion()
+        # plt.show()
+        # display_instances(img, r['rois'], r['masks'], r['class_ids'], MaskRCNNModel.class_names, r['scores'], ax=ax)
+        # plt.draw()
+        # plt.pause(0.01)
+        # print('end of plot instructions')
+        ##
+
         if r['class_ids'].size > 0:
+
+            for c in r['class_ids']:
+                new_path = destination_path+'/'+MaskRCNNModel.class_names[c]
+                if not os.path.exists(new_path):
+                    os.mkdir(new_path)
 
             for obj_idx in range(len(r['rois'])):
 
                 box_dimensions = r['rois'][obj_idx]
-                if abs((box_dimensions[1] - box_dimensions[3]) * (box_dimensions[0] - box_dimensions[2])) < min_area:
+                box_area = abs((box_dimensions[1] - box_dimensions[3]) * (box_dimensions[0] - box_dimensions[2]))
+                if box_area < min_area:
                     break
 
-                vectorized_image = Image.new("RGBA", original_image.size, 0)
+                masked_image = np.full(img.shape, (0, 0, 0), np.uint8)
 
-                for height in range(r['masks'][:, :, 0].shape[0]):
-                    for width in range(r['masks'][:, :, 0].shape[1]):
-                        if r['masks'][height, width, 0]:
-                            # @Todo: rather than using box area, use pixel threshold to filter image size
-                            vectorized_image.putpixel((width, height), original_image.getpixel((width, height)))
+                for c in range(3):
+                    masked_image[:, :, c] = np.where(r['masks'][:, :, obj_idx] == 1,
+                                                     img[:, :, c], 0)
 
-                # Good dimensions crop([1], [0] [3] [2]) !
-                vectorized_image.crop(
+                #segmented_image = Image.new("RGBA", masked_image)
+
+                ##
+                # following lines adapted from https://stackoverflow.com/questions/54703674/how-do-i-make-my-numpy-image-take-an-alpha-channel-value-in-python
+                ##
+
+                h, w = masked_image.shape[:2]
+                # Adding an alpha layer to masked_image
+                masked_image = np.dstack((masked_image, np.zeros((h, w), dtype=np.uint8) + 255))
+                # Make mask of black pixels - mask is True where image is black
+                mBlack = (masked_image[:, :, 0:3] == [0, 0, 0]).all(2)
+                # Make all pixels matched by mask into transparent ones
+                masked_image[mBlack] = (0, 0, 0, 0)
+
+                segmented_image = Image.fromarray(masked_image)
+
+                # print(filename, r['masks'][:, :, 0].shape[0], r['masks'][:, :, 0].shape[1], MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(compteur) + "_" + str(obj_idx) + ".png")
+
+                # Good dimensions crop([1], [0], [3], [2]) !
+                segmented_image.crop(
                     (box_dimensions[1], box_dimensions[0], box_dimensions[3], box_dimensions[2])).save(
-                    destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + str(compteur) + "_" +
-                        str(obj_idx) + ".png")
+                     destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(compteur) + "_" +
+                            str(obj_idx) + ".png")
 
             compteur += 1
 
