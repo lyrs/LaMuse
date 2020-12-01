@@ -1,6 +1,6 @@
 numpy
 tensorflow
-keras~=2.3.1
+keras~=2.4.3
 scipy
 matplotlib
 ipython
