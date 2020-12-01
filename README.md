@@ -1,5 +1,6 @@
 # LaMuse
 LaMuse : utilisation de méthodes de deep learning pour créer des sources d'inspiration pour les peintres.
+Ce travail est issu des travaux d'[Emmanuelle Potier](https://www.emmanuellepotier.com/copie-de-poemes-en-cours) et fait en collaboration avec elle.
 
 Ce dossier utilise le dépôt de matterport Mask_RCNN : https://github.com/matterport/Mask_RCNN
 
