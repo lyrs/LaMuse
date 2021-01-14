@@ -2,8 +2,8 @@ from glob import glob
 import numpy as np
 from matplotlib import pyplot as plt
 
-from Tools.MaskRCNNModel import MaskRCNNModel
-from Mask_RCNN.mrcnn.visualize import display_instances
+from .MaskRCNNModel import MaskRCNNModel
+from ..Mask_RCNN.mrcnn.visualize import display_instances
 import argparse
 import os
 from PIL import Image

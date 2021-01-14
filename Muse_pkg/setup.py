@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="lamiroy", # Replace with your own username
-    version="0.0.1",
+    name="LaMuse", # Replace with your own username
+    version="0.0.4",
     author="Bart Lamiroy",
     author_email="Bart.Lamiroy@univ-reims.fr",
     description="LaMuse, deep learning for painters",
@@ -15,8 +15,10 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU Lesser General Public License",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    include_package_data=True,
+    package_data={'': ['mask_rcnn_coco.h5', 'BaseImages_objets/*/*png']},
 )

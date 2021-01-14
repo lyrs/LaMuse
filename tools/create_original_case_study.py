@@ -18,7 +18,7 @@ from matplotlib.patches import Rectangle
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
-from Tools.MaskRCNNModel import MaskRCNNModel
+from .MaskRCNNModel import MaskRCNNModel
 
 
 # draw an image with detected objects

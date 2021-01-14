@@ -1,11 +1,14 @@
 from glob import glob
-from os.path import basename
+import os
+import errno
 import argparse
+import pkg_resources
+
 
 import PySimpleGUI as sg
-from Tools.generate_segmented_pictures import generate_images
-from Tools.create_original_case_study import create_case_study
-from Tools.fast_style_transfer import save_image
+from .tools.generate_segmented_pictures import generate_images
+from .tools.create_original_case_study import create_case_study
+from .tools.fast_style_transfer import save_image
 
 segmentation_suffix = "_objets"
 
@@ -13,6 +16,8 @@ default_image_folder = './BaseImages'
 default_background_folder = None
 default_painting_folder = './Paintings'
 default_interpretation_folder = './Interpretations'
+
+mask_rcnn_config_file = os.path.dirname(__file__) + '/mask_rcnn_coco.h5'
 
 sg.theme('DarkAmber')
 
@@ -27,6 +32,14 @@ layout = [[sg.Text("Dossier d'images substituts"), sg.Input(), sg.FolderBrowse(i
 
 if __name__ == "__main__":
 
+    ##
+    #  Input argument parsing declarations :
+    #   - input_dir (-in)
+    #   - substitute_dir (-sub)
+    #   - output_dir (-out)
+    #   - demo flag
+    #   - nogui flag
+    ##
     parser = argparse.ArgumentParser(prog="LaMuse",
                                      description='Generates reinterpretations of paintings')
     parser.add_argument("input_dir", metavar='in', type=str, nargs='?', help='input directory containing paintings to '
@@ -41,6 +54,13 @@ if __name__ == "__main__":
     parser.add_argument("--nogui", action='store_true', help='Run in no-gui mode')
 
     args = parser.parse_args()
+
+    # @TODO properly include stuff using pkg_ressources
+    if not os.path.isfile(mask_rcnn_config_file):
+        if not args.nogui:
+            sg.Popup('LaMuse ne peut pas fonctionner sans le fichier %s. Merci de lire la documentation.' % mask_rcnn_config_file, title='Erreur')
+        raise FileNotFoundError(
+            errno.ENOENT, os.strerror(errno.ENOENT), mask_rcnn_config_file)
 
     # generate_images(args.input_dir, args.output_dir if args.output_dir else args.input_dir)
 
@@ -71,18 +91,34 @@ if __name__ == "__main__":
             sg.Popup("La génération de cas d'étude a commencé, en fonction du nombre de peintures fournies ceci peut "
                      "prendre un certain temps", title="Création démarrée", non_blocking=True)
 
+            ##
+            # The following function will go over all images in 'default_painting_folder' and use
+            # the Mask_RCNN neural network to find identifiable objects.
+            # It will then substitute these objects with similar ones stored in the 'default_image_folder+segmentation_suffix'
+            # folder, and replace the background with a random image chosen from 'default_background_folder'
+            # The results are stored in 'dafault_interpretation_folder'
+            ##
             create_case_study(default_painting_folder, default_image_folder+segmentation_suffix,
                               default_background_folder, default_interpretation_folder, 1)
 
+            ##
+            # Go over all images in 'default_painting_folder' and the corresponding images in
+            # 'default_interpretation_folder' and apply a style transfer.
+            ##
             image_extensions = ["jpg", "gif", "png", "tga"]
             painting_file_list = [y for x in [glob(default_painting_folder + '/*.%s' % ext) for ext in image_extensions]
                                   for y in x]
 
             for painting in painting_file_list:
                 interpretation_file_list = [y for x in
-                                      [glob(default_interpretation_folder + '/%s*.%s' % (basename(painting), ext)) for ext in image_extensions]
+                                      [glob(default_interpretation_folder + '/%s*.%s' % (os.path.basename(painting), ext)) for ext in image_extensions]
                                       for y in x]
                 for interpretation in interpretation_file_list:
+                    ##
+                    # The following function will apply a style transfer on 'interpretation' as to have it
+                    # adopt the same style as 'painting'
+                    # The result is stored in 'interpretation'
+                    ##
                     save_image(interpretation, painting, interpretation)
 
             sg.Popup("Les résultats sont disponibles dans %s" % default_interpretation_folder, title="Cas d'études terminé")

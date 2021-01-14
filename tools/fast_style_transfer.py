@@ -62,7 +62,7 @@ def new_load_img(path_to_img: str, max_dim: int = 512):
 
 
 def save_image(path_content: str, path_style: str, path_to_save: str) -> None:
-    max_dim = 1024
+    max_dim = 512
     min_dim = 128  # A smaller image size will crash style transfer network
 
     # Load content and style images (see example in the attached colab).

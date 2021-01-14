@@ -1,5 +1,7 @@
-from Mask_RCNN.mrcnn.config import Config
-from Mask_RCNN.mrcnn import model as modellib
+import os
+
+from ..Mask_RCNN.mrcnn.config import Config
+from ..Mask_RCNN.mrcnn import model as modellib
 
 
 class MaskRCNNModel:
@@ -33,9 +35,12 @@ class MaskRCNNModel:
                    'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
                    'teddy bear', 'hair drier', 'toothbrush']
 
+    # @TODO properly include stuff using pkg_ressources
     def __init__(self):
         self.config = MaskRCNNModel.MaskRCNNConfig()
 
         print("loading  weights for Mask R-CNN model…")
         self.model = modellib.MaskRCNN(mode="inference", config=self.config, model_dir="./")
-        self.model.load_weights("mask_rcnn_coco.h5", by_name=True)
+
+        path = os.path.dirname(__file__) + "/../mask_rcnn_coco.h5"
+        self.model.load_weights(path, by_name=True)

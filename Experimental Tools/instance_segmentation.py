@@ -12,7 +12,7 @@ from glob import glob
 from keras.preprocessing.image import load_img
 from keras.preprocessing.image import img_to_array
 
-from Tools.MaskRCNNModel import MaskRCNNModel
+from tools.MaskRCNNModel import MaskRCNNModel
 
 
 def draw_image_with_boxes(filename: str, boxes_list: list) -> None:
