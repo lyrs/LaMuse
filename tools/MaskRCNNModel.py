@@ -9,12 +9,9 @@ class MaskRCNNModel:
     _instance = None
     def __new__(cls):
         if not cls._instance:
-            print("ici")
             cls._instance = super(MaskRCNNModel, cls).__new__(cls)
             cls._instance.__initialized = False
-            print (" new singleton")
-        else :
-            print("Already exist")
+
         return cls._instance
 
     class MaskRCNNConfig(Config):
