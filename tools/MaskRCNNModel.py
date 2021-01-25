@@ -5,6 +5,18 @@ from ..Mask_RCNN.mrcnn import model as modellib
 
 
 class MaskRCNNModel:
+    # Singleton pattern from : https://stackoverflow.com/questions/12305142/issue-with-singleton-python-call-two-times-init
+    _instance = None
+    def __new__(cls):
+        if not cls._instance:
+            print("ici")
+            cls._instance = super(MaskRCNNModel, cls).__new__(cls)
+            cls._instance.__initialized = False
+            print (" new singleton")
+        else :
+            print("Already exist")
+        return cls._instance
+
     class MaskRCNNConfig(Config):
         # give the configuration a recognizable name
         NAME = "MaskRCNN_inference"
@@ -37,10 +49,13 @@ class MaskRCNNModel:
 
     # @TODO properly include stuff using pkg_ressources
     def __init__(self):
+        if(self.__initialized): 
+            return
+        self.__initialized = True
         self.config = MaskRCNNModel.MaskRCNNConfig()
 
         print("loading  weights for Mask R-CNN model…")
         self.model = modellib.MaskRCNN(mode="inference", config=self.config, model_dir="./")
 
         path = os.path.dirname(__file__) + "/../mask_rcnn_coco.h5"
-        self.model.load_weights(path, by_name=True)
+        self.model.load_weights(path, by_name=True)        
