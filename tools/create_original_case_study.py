@@ -119,7 +119,11 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
                 #    background_image = Image.open(path_to_results + 'temp.png')
 
                 # Pick a random object
-                replacement_object = Image.open(random.choice(object_file_list[current_class]))
+                try:
+                    replacement_object = Image.open(random.choice(object_file_list[current_class]))
+                except IndexError:
+                    print(current_class, painting_name)
+                    break
 
                 # Définition des dimensions et du placement du futur objet à coller
                 original_object_bbox = (r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2])
