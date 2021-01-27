@@ -68,7 +68,7 @@ def save_image(path_content: str, path_style: str, path_to_save: str) -> None:
     # Load content and style images (see example in the attached colab).
     # https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2
     content_image = plt.imread(path_content)
-    # style_image = plt.imread(path_content)
+    # style_image = plt.imread(path_style)
 
     style_image = new_load_img(path_style, max_dim)
     content_image_scaled = new_load_img(path_content, max_dim)
