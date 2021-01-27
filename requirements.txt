@@ -7,3 +7,4 @@ ipython
 pip
 setuptools
 Pillow
+opencv-python
