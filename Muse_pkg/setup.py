@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="LaMuse", # Replace with your own username
-    version="0.0.4",
+    name="LaMuse", 
+    version="0.0.6",
     author="Bart Lamiroy",
     author_email="Bart.Lamiroy@univ-reims.fr",
     description="LaMuse, deep learning for painters",
