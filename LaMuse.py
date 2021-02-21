@@ -22,7 +22,7 @@ mask_rcnn_config_file = os.path.dirname(__file__) + '/mask_rcnn_coco.h5'
 sg.theme('DarkAmber')
 
 layout = [[sg.Text("Dossier d'images substituts"), sg.Input(), sg.FolderBrowse(initial_folder=".")],
-          # [sg.Text('Veuillez confirmer le traitement d\'images actuelles (ne pas fermer cette fenëtre durant le traitement) : ')],
+          # [gui.Text('Veuillez confirmer le traitement d\'images actuelles (ne pas fermer cette fenëtre durant le traitement) : ')],
           [sg.Button("Génération de substituts")],
           [sg.Text('Dossier d\'oeuvres'), sg.Input(), sg.FolderBrowse(initial_folder=".")],
           [sg.Text('Dossier d\'images de fond : '), sg.Input(), sg.FolderBrowse(initial_folder=".")],
