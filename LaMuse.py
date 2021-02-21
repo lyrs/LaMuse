@@ -75,18 +75,18 @@ if __name__ == "__main__":
     ##
     parser = argparse.ArgumentParser(prog="LaMuse",
                                      description='Generates reinterpretations of paintings')
-    parser.add_argument("--input_dir", metavar='in', type=str, nargs=1,
+    parser.add_argument("--input_dir", "-in", metavar='in', type=str, nargs=1,
                         help='input directory containing paintings to reinterpret (defaults to "'
                              + default_painting_folder + '" if non specified)', default=[default_painting_folder])
-    parser.add_argument("--output_dir", metavar='out', type=str, nargs=1,
+    parser.add_argument("--output_dir", "-out", metavar='out', type=str, nargs=1,
                         help='output directory for interpreted paintings (defaults to "' +
                              default_interpretation_folder + '" if non specified)',
                         default=[default_interpretation_folder])
-    parser.add_argument("--background_dir", metavar='bck', type=str, nargs=1,
+    parser.add_argument("--background_dir", "-bck", metavar='bck', type=str, nargs=1,
                         help='background directory (defaults to "' +
                              default_background_folder + '" if non specified)',
                         default=[default_background_folder])
-    parser.add_argument("--substitute_dir", metavar='sub', type=str, nargs=1,
+    parser.add_argument("--substitute_dir", "-sub", metavar='sub', type=str, nargs=1,
                         help='directory containing painting substitute images (defaults to "' +
                              default_image_folder + segmentation_suffix + '" if non specified)',
                         default=[default_image_folder + segmentation_suffix])
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     print(default_substitute_folder)
     print(default_background_folder)
 
-    # @TODO properly include stuff using pkg_ressources
+    # @TODO properly include stuff using pkg_resources
     if not os.path.isfile(mask_rcnn_config_file):
         if not args.nogui:
             sg.Popup('LaMuse ne peut pas fonctionner sans le fichier %s. Merci de lire la documentation.' % mask_rcnn_config_file, title='Erreur')
@@ -143,8 +143,8 @@ if __name__ == "__main__":
                 else:
                     default_background_folder = default_image_folder+'/Backgrounds'
 
-                sg.Popup("La génération de cas d'étude a commencé, en fonction du nombre de peintures fournies ceci peut "
-                         "prendre un certain temps", title="Création démarrée", non_blocking=True)
+                sg.Popup("La génération de cas d'étude a commencé, en fonction du nombre de peintures fournies ceci "
+                         "peut prendre un certain temps", title="Création démarrée", non_blocking=True)
 
                 generate_full_case_study(default_painting_folder, default_substitute_folder, default_background_folder,
                                          default_interpretation_folder)
