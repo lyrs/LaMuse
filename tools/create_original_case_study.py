@@ -103,6 +103,7 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
             except IndexError:
                 print(path_to_background_images + " is empty, taking initial image instead")
                 background_image_name = painting_filename
+
             background_image = Image.open(background_image_name)
             # Resize the background image with the size of painting.
             background_image = background_image.resize((painting_width, painting_height), Image.ANTIALIAS)
@@ -126,7 +127,7 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
                 try:
                     replacement_object = Image.open(random.choice(object_file_list[current_class]))
                 except IndexError:
-                    print(current_class, painting_name)
+                    print("Cannot find", current_class, "in", path_objects_to_replace, "for", painting_name)
                     break
 
                 # Définition des dimensions et du placement du futur objet à coller
@@ -143,12 +144,16 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
                 background_image.paste(replacement_object, (r['rois'][i][1], r['rois'][i][0]), replacement_object)
 
                 # Save background_image.
-                if i == r['class_ids'].size - 1:
-                    file_saved = path_to_results + painting_name + str(j) + '.png'
-                    background_image = background_image.convert("RGB")
-                    background_image.save(file_saved)
+                # if i == r['class_ids'].size - 1:
+                #    file_saved = path_to_results + painting_name + str(j) + '.png'
+                #    background_image = background_image.convert("RGB")
+                #    background_image.save(file_saved)
                 # else:
                 #    background_image.save(path_to_results + 'temp.png')
+
+            file_saved = path_to_results + painting_name + str(j) + '.png'
+            background_image = background_image.convert("RGB")
+            background_image.save(file_saved)
 
 
 if __name__ == "__main__":
