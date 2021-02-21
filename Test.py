@@ -16,7 +16,7 @@ import PySimpleGUI as sg
 from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import save_image
-from .tools.compare_images import best_image
+from .tools.compare_images import best_image, blackAndWhitePNG
 
 segmentation_suffix = "_objets"
 
@@ -30,7 +30,7 @@ mask_rcnn_config_file = os.path.dirname(__file__) + '/mask_rcnn_coco.h5'
 
 if __name__ == "__main__":
     # example give the best image found in BaseImage_objects
-    cursor = 20
+    cursor = 0.5
     path_objects_to_replace = "./LaMuse/BaseImages_objets"
     image_extensions = ["jpg", "gif", "png", "tga"]
 
@@ -38,22 +38,29 @@ if __name__ == "__main__":
     object_file_list = []
     for obj in MaskRCNNModel.class_names:
         object_file_list.extend([y for x in [glob(path_objects_to_replace + '/%s/*.%s' % (obj, ext))
-                                             for ext in image_extensions] for y in x])
+                                               for ext in image_extensions] for y in x])
     
-    print(len(object_file_list))
+    print("nombre total d'images : ", len(object_file_list))
     r = randint(0,len(object_file_list)-1)
     target_file = object_file_list[r]
 
-    # images
-    object_image_list = [cv2.imread(i) for i in object_file_list]
-    target_image = cv2.imread(target_file)
+    # images , IMREAD_UNCHANGED to make sure alpha channel is loaded
+    object_image_list = [cv2.imread(i, cv2.IMREAD_UNCHANGED) for i in object_file_list]
+    target_image = cv2.imread(target_file, cv2.IMREAD_UNCHANGED)
 
     image, result = best_image(target_image, object_image_list, cursor)
 
-    print("Résultat de la bizaritude obtenue : ", result)
+    print("Différence de bizaritude obtenue par rapport a la valeur demandée : ", result)
 
     plt.figure(1)
     plt.imshow(target_image)
     plt.figure(2)
     plt.imshow(image)
     plt.show()
+
+    """
+    img = blackAndWhitePNG(target_image)
+    print(img)
+    plt.imshow(img)
+    plt.show()
+    """
