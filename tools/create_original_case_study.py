@@ -98,7 +98,11 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
 
         for j in range(NUMBER_OF_TRIES):
             # Pick a random background image
-            background_image_name = random.choice(background_file_list)
+            try:
+                background_image_name = random.choice(background_file_list)
+            except IndexError:
+                print(path_to_background_images + " is empty, taking initial image instead")
+                background_image_name = painting_filename
             background_image = Image.open(background_image_name)
             # Resize the background image with the size of painting.
             background_image = background_image.resize((painting_width, painting_height), Image.ANTIALIAS)
