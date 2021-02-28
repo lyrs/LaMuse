@@ -30,7 +30,7 @@ mask_rcnn_config_file = os.path.dirname(__file__) + '/mask_rcnn_coco.h5'
 
 if __name__ == "__main__":
     # example give the best image found in BaseImage_objects
-    cursor = 0.5
+    cursor = 0.0
     path_objects_to_replace = "./LaMuse/BaseImages_objets"
     image_extensions = ["jpg", "gif", "png", "tga"]
 
@@ -44,18 +44,19 @@ if __name__ == "__main__":
     r = randint(0,len(object_file_list)-1)
     target_file = object_file_list[r]
 
+    object_file_list.remove(target_file) # not comparing target with itself
+
     # images , IMREAD_UNCHANGED to make sure alpha channel is loaded
     object_image_list = [cv2.imread(i, cv2.IMREAD_UNCHANGED) for i in object_file_list]
     target_image = cv2.imread(target_file, cv2.IMREAD_UNCHANGED)
 
     image, result = best_image(target_image, object_image_list, cursor)
 
-    print("Différence de bizaritude obtenue par rapport a la valeur demandée : ", result)
+    fig, axs = plt.subplots(1,2)
+    fig.suptitle("Différence de bizaritude obtenue par rapport a la valeur demandée : " + str(result) + "\nValeur cible : " + str(cursor))
 
-    plt.figure(1)
-    plt.imshow(target_image)
-    plt.figure(2)
-    plt.imshow(image)
+    axs[0].imshow(target_image)
+    axs[1].imshow(image)
     plt.show()
 
     """
