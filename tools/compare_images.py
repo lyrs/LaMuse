@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+from numpy.core.fromnumeric import shape
 
 
 # https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
@@ -10,6 +12,7 @@ def best_image(target, image_list:list, cursor:float):
     img_gray = cv2.cvtColor(blackAndWhitePNG(target),cv2.COLOR_BGR2GRAY)
     ret,thresh = cv2.threshold(img_gray, 127, 255,0)
     targetContour,hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # contour of the target
+    
     for i in range(len(image_list)):
         img_gray = cv2.cvtColor(blackAndWhitePNG(image_list[i]),cv2.COLOR_BGR2GRAY)
         ret,thresh = cv2.threshold(img_gray, 127, 255,0)
@@ -22,7 +25,10 @@ def best_image(target, image_list:list, cursor:float):
         if (best == None or diff<best): # find best
             best = diff
             best_indice = i
-    return image_list[best_indice], best 
+            best_contour = contours
+
+    res = applyOrientation(targetContour, best_contour, image_list[best_indice])
+    return res, best 
 
 
 def blackAndWhitePNG(img):
@@ -32,6 +38,71 @@ def blackAndWhitePNG(img):
     mask = np.logical_not(mask)
     resImg[mask] = [255, 255, 255, 255]  # others -> white (object)
     return resImg
+
+# from https://stackoverflow.com/questions/58632469/how-to-find-the-orientation-of-an-object-shape-python-opencv
+def getOrientationAndScale(contour):
+    # get rotated rectangle from outer contour
+    rect = cv2.minAreaRect(contour[0])
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)
+
+    # get angle from rotated rectangle
+    angle = rect[-1]
+
+    # from https://www.pyimagesearch.com/2017/02/20/text-skew-correction-opencv-python/
+    # the `cv2.minAreaRect` function returns values in the
+    # range [-90, 0); as the rectangle rotates clockwise the
+    # returned angle trends to 0 -- in this special case we
+    # need to add 90 degrees to the angle
+    if angle < -45:
+        angle = -(90 + angle)
+    
+    # otherwise, just take the inverse of the angle to make
+    # it positive
+    else:
+        angle = -angle
+
+    scale = 1 # not calculated for the moment
+    print(angle,"deg")
+    return angle, scale
+
+def applyOrientation(contour1, contour2, image):
+    angle1, scale1 = getOrientationAndScale(contour1)
+    angle2, scale2 = getOrientationAndScale(contour2)
+    angleDiff = angle1 - angle2
+    scaleDiff = scale1/scale2
+    rotated = rotate_bound(image, angleDiff)
+    scaled = rotated #cv2.resize(rotated, (int(image.shape[1] * scaleDiff),int(image.shape[0] * scaleDiff)))
+
+    print("Angle ", angleDiff)
+    fig, axs = plt.subplots(1,2)
+    axs[0].imshow(scaled)
+    axs[0].set_title("rotated")
+    axs[1].imshow(image)
+    axs[1].set_title("origin")
+    plt.show()
+    return rotated
+
+# from https://www.pyimagesearch.com/2017/01/02/rotate-images-correctly-with-opencv-and-python/
+def rotate_bound(image, angle):
+    # grab the dimensions of the image and then determine the
+    # center
+    (h, w) = image.shape[:2]
+    (cX, cY) = (w // 2, h // 2)
+    # grab the rotation matrix (applying the negative of the
+    # angle to rotate clockwise), then grab the sine and cosine
+    # (i.e., the rotation components of the matrix)
+    M = cv2.getRotationMatrix2D((cX, cY), -angle, 1.0)
+    cos = np.abs(M[0, 0])
+    sin = np.abs(M[0, 1])
+    # compute the new bounding dimensions of the image
+    nW = int((h * sin) + (w * cos))
+    nH = int((h * cos) + (w * sin))
+    # adjust the rotation matrix to take into account translation
+    M[0, 2] += (nW / 2) - cX
+    M[1, 2] += (nH / 2) - cY
+    # perform the actual rotation and return the image
+    return cv2.warpAffine(image, M, (nW, nH))
 
 
 
