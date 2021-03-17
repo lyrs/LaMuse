@@ -12,9 +12,9 @@ from .tools.fast_style_transfer import save_image
 
 segmentation_suffix = "_objets"
 
-default_image_folder = './BaseImages'
-default_background_folder = None
-default_painting_folder = './Paintings'
+default_image_folder = './LaMuse/BaseImages'
+default_background_folder = './LaMuse/imgEx'
+default_painting_folder = './LaMuse/Paintings'
 default_interpretation_folder = './Interpretations'
 
 mask_rcnn_config_file = os.path.dirname(__file__) + '/mask_rcnn_coco.h5'

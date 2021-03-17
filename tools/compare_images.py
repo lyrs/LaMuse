@@ -8,7 +8,7 @@ from numpy.core.fromnumeric import shape
 # return the best image according to target and the value mesuring the shape difference
 def best_image(target, image_list:list, cursor:float):
     best = None # positive value
-    best_indice = 0 # indice of the best image
+    best_indice = -1 # indice of the best image
     img_gray = cv2.cvtColor(blackAndWhitePNG(target),cv2.COLOR_BGR2GRAY)
     ret,thresh = cv2.threshold(img_gray, 127, 255,0)
     targetContour,hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # contour of the target
@@ -25,7 +25,7 @@ def best_image(target, image_list:list, cursor:float):
         if (best == None or diff<best): # find best
             best = diff
             best_indice = i
-            best_contour = contours
+            best_contour = contours.copy()
 
     res = applyOrientation(targetContour, best_contour, image_list[best_indice])
     return res, best 
@@ -62,26 +62,34 @@ def getOrientationAndScale(contour):
     else:
         angle = -angle
 
+    # rect : (x,y), (width, height), angle
+    print("height : ", rect[1][1], " width : ", rect[1][0])
+    if rect[1][0] > rect[1][1] : # width < height
+        angle += 90
+
     scale = 1 # not calculated for the moment
-    print(angle,"deg")
+    print("Angle de l'image : ", angle,"deg")
     return angle, scale
 
 def applyOrientation(contour1, contour2, image):
     angle1, scale1 = getOrientationAndScale(contour1)
     angle2, scale2 = getOrientationAndScale(contour2)
-    angleDiff = angle1 - angle2
+    angleDiff = angle1 - angle2 # vérifier l'intervalle
+    print("Rotation de :", angleDiff)
     scaleDiff = scale1/scale2
     rotated = rotate_bound(image, angleDiff)
-    scaled = rotated #cv2.resize(rotated, (int(image.shape[1] * scaleDiff),int(image.shape[0] * scaleDiff)))
-
-    print("Angle ", angleDiff)
-    fig, axs = plt.subplots(1,2)
+    scaled = rotated #cv2.resize(rotated, (int(image.shape[1] * scaleDiff),int(image.shape[0] * scaleDiff)))    
+    """fig, axs = plt.subplots(1,2)
     axs[0].imshow(scaled)
     axs[0].set_title("rotated")
     axs[1].imshow(image)
     axs[1].set_title("origin")
-    plt.show()
+    plt.show()"""
     return rotated
+
+#idées pour l'angle : 
+# https://stackoverflow.com/questions/24073127/opencvs-rotatedrect-angle-does-not-provide-enough-information en c++
+#
 
 # from https://www.pyimagesearch.com/2017/01/02/rotate-images-correctly-with-opencv-and-python/
 def rotate_bound(image, angle):
