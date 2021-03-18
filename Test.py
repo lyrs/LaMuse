@@ -16,7 +16,7 @@ import PySimpleGUI as sg
 from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import save_image
-from .tools.compare_images import best_image, blackAndWhitePNG
+from .tools.compare_images import best_image, getOrientationAndScale
 
 segmentation_suffix = "_objets"
 
