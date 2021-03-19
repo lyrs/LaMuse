@@ -78,26 +78,7 @@ def generate_images(source_path: str, destination_path: str) -> None:
                 if box_area < min_area:
                     break
 
-                masked_image = np.full(img.shape, (0, 0, 0), np.uint8)
-
-                for c in range(3):
-                    masked_image[:, :, c] = np.where(r['masks'][:, :, obj_idx] == 1,
-                                                     img[:, :, c], 0)
-
-                #segmented_image = Image.new("RGBA", masked_image)
-
-                ##
-                # following lines adapted from https://stackoverflow.com/questions/54703674/how-do-i-make-my-numpy-image-take-an-alpha-channel-value-in-python
-                ##
-
-                h, w = masked_image.shape[:2]
-                # Adding an alpha layer to masked_image
-                masked_image = np.dstack((masked_image, np.zeros((h, w), dtype=np.uint8) + 255))
-                # Make mask of black pixels - mask is True where image is black
-                mBlack = (masked_image[:, :, 0:3] == [0, 0, 0]).all(2)
-                # Make all pixels matched by mask into transparent ones
-                masked_image[mBlack] = (0, 0, 0, 0)
-
+                masked_image = getSegment(img, r, obj_idx)
                 segmented_image = Image.fromarray(masked_image)
 
                 # print(filename, r['masks'][:, :, 0].shape[0], r['masks'][:, :, 0].shape[1], MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(compteur) + "_" + str(obj_idx) + ".png")
@@ -109,6 +90,29 @@ def generate_images(source_path: str, destination_path: str) -> None:
                             str(obj_idx) + ".png")
 
             compteur += 1
+
+# Give the mask for the element at 'index' in the image 'img' with the result array 'r'
+def getSegment(img, r, index):
+    masked_image = np.full(img.shape, (0, 0, 0), np.uint8)
+
+    for c in range(3):
+        masked_image[:, :, c] = np.where(r['masks'][:, :, index] == 1,
+                                            img[:, :, c], 0)
+
+    #segmented_image = Image.new("RGBA", masked_image)
+
+    ##
+    # following lines adapted from https://stackoverflow.com/questions/54703674/how-do-i-make-my-numpy-image-take-an-alpha-channel-value-in-python
+    ##
+
+    h, w = masked_image.shape[:2]
+    # Adding an alpha layer to masked_image
+    masked_image = np.dstack((masked_image, np.zeros((h, w), dtype=np.uint8) + 255))
+    # Make mask of black pixels - mask is True where image is black
+    mBlack = (masked_image[:, :, 0:3] == [0, 0, 0]).all(2)
+    # Make all pixels matched by mask into transparent ones
+    masked_image[mBlack] = (0, 0, 0, 0)
+    return masked_image
 
 
 if __name__ == "__main__":

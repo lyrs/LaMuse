@@ -42,7 +42,12 @@ def blackAndWhitePNG(img):
 # from https://stackoverflow.com/questions/58632469/how-to-find-the-orientation-of-an-object-shape-python-opencv
 def getOrientationAndScale(contour):
     # get rotated rectangle from outer contour
-    rect = cv2.minAreaRect(contour[0])
+    largerContour = contour[0]
+    for i in contour:
+        if i.shape >largerContour.shape :
+            largerContour = i
+    print("Contour choisi : ", largerContour.shape)
+    rect = cv2.minAreaRect(largerContour)
     box = cv2.boxPoints(rect)
     box = np.int0(box)
 

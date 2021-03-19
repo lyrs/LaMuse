@@ -11,9 +11,8 @@ from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import save_image
 
 segmentation_suffix = "_objets"
-
 default_image_folder = './LaMuse/BaseImages'
-default_background_folder = './LaMuse/imgEx'
+default_background_folder = ''
 default_painting_folder = './LaMuse/Paintings'
 default_interpretation_folder = './Interpretations'
 
