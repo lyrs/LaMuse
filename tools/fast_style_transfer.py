@@ -12,6 +12,10 @@ from matplotlib import pyplot as plt
 ##
 
 def tensor_to_image(tensor):
+    """
+    :param tensor:
+    :return:
+    """
     tensor = tf.cast(tensor * 255, dtype=tf.uint8)
 
     tensor = np.array(tensor, dtype=np.uint8)
@@ -22,6 +26,10 @@ def tensor_to_image(tensor):
 
 
 def load_img(path_to_img: str):
+    """
+    :param path_to_img:
+    :return:
+    """
     max_dim = 512
     img = tf.io.read_file(path_to_img)
     img = tf.image.decode_image(img, channels=3)
@@ -61,21 +69,28 @@ def new_load_img(path_to_img: str, max_dim: int = 512):
     return image
 
 
-def save_image(path_content: str, path_style: str, path_to_save: str) -> None:
+def save_image(path_content: str, path_style: str, path_to_save: str, scale_image: bool = True) -> None:
+    """
+    :param path_content:
+    :param path_style:
+    :param path_to_save:
+    :param scale_image:
+    :return:
+    """
     max_dim = 512
     min_dim = 128  # A smaller image size will crash style transfer network
 
     # Load content and style images (see example in the attached colab).
     # https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2
-    content_image = plt.imread(path_content)
+    content_image = new_load_img(path_content, max_dim)
     # style_image = plt.imread(path_style)
-
     style_image = new_load_img(path_style, max_dim)
-    content_image_scaled = new_load_img(path_content, max_dim)
+
+    if not scale_image:
+        content_image = plt.imread(path_content)
 
     # Convert to float32 numpy array, add batch dimension, and normalize to range [0, 1]. Example using numpy:
     content_image = content_image.astype(np.float32)[np.newaxis, ...] / 255.
-    content_image_scaled = content_image_scaled.astype(np.float32)[np.newaxis, ...] / 255.
     style_image = style_image.astype(np.float32)[np.newaxis, ...] / 255.
     # Optionally resize the images. It is recommended that the style image is about
     # 256 pixels (this size was used when training the style transfer network).
@@ -85,14 +100,18 @@ def save_image(path_content: str, path_style: str, path_to_save: str) -> None:
     hub_module = tf_hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
 
     # Stylize image.
+    # @TODO Investigate and check image formats correctly
+    # @Bug Sometimes, for some kind of images,
+    #  tensorflow aborts with the following error : tensorflow.python.framework.errors_impl.InvalidArgumentError:
+    #  input depth must be evenly divisible by filter depth: 4 vs 3
+    #
     outputs = hub_module(tf.constant(content_image), tf.constant(style_image))
     stylized_image = tf.cast(outputs[0] * 255, dtype=tf.uint8).numpy()[0]
-
-    outputs_scaled = hub_module(tf.constant(content_image_scaled), tf.constant(style_image))
-    stylized_image_scaled = tf.cast(outputs_scaled[0] * 255, dtype=tf.uint8).numpy()[0]
-
     stylized_image = PIL.Image.fromarray(stylized_image)
     stylized_image.save(path_to_save)
 
-    stylized_image_scaled = PIL.Image.fromarray(stylized_image_scaled)
-    stylized_image_scaled.save(path_to_save + "_scaled.png")
+    # Stylize image (scaled).
+    # outputs_scaled = hub_module(tf.constant(content_image_scaled), tf.constant(style_image))
+    # stylized_image_scaled = tf.cast(outputs_scaled[0] * 255, dtype=tf.uint8).numpy()[0]
+    # stylized_image_scaled = PIL.Image.fromarray(stylized_image_scaled)
+    # stylized_image_scaled.save(path_to_save + "_scaled.png")
