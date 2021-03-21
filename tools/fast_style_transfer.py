@@ -92,7 +92,7 @@ def save_image(path_content: str, path_style: str, path_to_save: str) -> None:
     stylized_image_scaled = tf.cast(outputs_scaled[0] * 255, dtype=tf.uint8).numpy()[0]
 
     stylized_image = PIL.Image.fromarray(stylized_image)
-    stylized_image.save(path_to_save)
+    stylized_image.save(path_to_save + "_stylized.png")
 
     stylized_image_scaled = PIL.Image.fromarray(stylized_image_scaled)
-    stylized_image_scaled.save(path_to_save + "_scaled.png")
+    stylized_image_scaled.save(path_to_save + "_stylized_scaled.png")

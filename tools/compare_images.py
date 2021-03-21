@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.core.fromnumeric import shape
 
+THRESHOLD_RATIO = 10
 
 # https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
 # return the best image according to target and the value mesuring the shape difference
@@ -14,6 +15,9 @@ def best_image(target, image_list:list, cursor:float):
     targetContour,hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # contour of the target
     
     for i in range(len(image_list)):
+        if (target.size / image_list[i].size) < 1/THRESHOLD_RATIO or (target.size / image_list[i].size) > THRESHOLD_RATIO:
+            #print("images too different")
+            continue
         img_gray = cv2.cvtColor(blackAndWhitePNG(image_list[i]),cv2.COLOR_BGR2GRAY)
         ret,thresh = cv2.threshold(img_gray, 127, 255,0)
         contours,hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # contour of the image
@@ -42,7 +46,12 @@ def blackAndWhitePNG(img):
 # from https://stackoverflow.com/questions/58632469/how-to-find-the-orientation-of-an-object-shape-python-opencv
 def getOrientationAndScale(contour):
     # get rotated rectangle from outer contour
-    rect = cv2.minAreaRect(contour[0])
+    largerContour = contour[0]
+    for i in contour:
+        if i.shape >largerContour.shape :
+            largerContour = i
+    #print("Contour choisi : ", largerContour.shape)
+    rect = cv2.minAreaRect(largerContour)
     box = cv2.boxPoints(rect)
     box = np.int0(box)
 
@@ -63,22 +72,19 @@ def getOrientationAndScale(contour):
         angle = -angle
 
     # rect : (x,y), (width, height), angle
-    print("height : ", rect[1][1], " width : ", rect[1][0])
+    #print("height : ", rect[1][1], " width : ", rect[1][0])
     if rect[1][0] > rect[1][1] : # width < height
         angle += 90
 
-    scale = 1 # not calculated for the moment
-    print("Angle de l'image : ", angle,"deg")
-    return angle, scale
+    #print("Angle de l'image : ", angle,"deg")
+    return angle
 
 def applyOrientation(contour1, contour2, image):
-    angle1, scale1 = getOrientationAndScale(contour1)
-    angle2, scale2 = getOrientationAndScale(contour2)
+    angle1 = getOrientationAndScale(contour1)
+    angle2 = getOrientationAndScale(contour2)
     angleDiff = angle1 - angle2 # vérifier l'intervalle
-    print("Rotation de :", angleDiff)
-    scaleDiff = scale1/scale2
-    rotated = rotate_bound(image, angleDiff)
-    scaled = rotated #cv2.resize(rotated, (int(image.shape[1] * scaleDiff),int(image.shape[0] * scaleDiff)))    
+    #print("Rotation de :", angleDiff)
+    rotated = rotate_bound(image, angleDiff) 
     """fig, axs = plt.subplots(1,2)
     axs[0].imshow(scaled)
     axs[0].set_title("rotated")

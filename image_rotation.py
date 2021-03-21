@@ -47,7 +47,7 @@ if __name__ == "__main__":
         axs[1].set_title("image modèle")
         axs[2].imshow(finale_image)
         axs[2].set_title("image finale")
-        #plt.show()
+        plt.show()
 
     default_image = cv2.imread('./LaMuse/rotate_image_testim/helicoptere/186_0d.png', cv2.IMREAD_UNCHANGED)
     cd = getcontour(default_image)
@@ -64,4 +64,4 @@ if __name__ == "__main__":
         axs[1].set_title("image modèle")
         axs[2].imshow(finale_image)
         axs[2].set_title("image finale")
-        #plt.show()
+        plt.show()
