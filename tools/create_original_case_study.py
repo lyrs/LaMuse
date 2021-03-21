@@ -3,6 +3,8 @@ import os
 # os.chdir('./Mask_RCNN')
 from glob import glob
 
+from tensorflow.python.keras.backend import reset_uids
+
 # import tensorflow.compat.v1 as tf
 
 # tf.disable_v2_behavior()
@@ -107,9 +109,9 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
 
         # Generate a number of altered forms of painting
         NUMBER_OF_TRIES = nb_paintings
-
         for j in range(NUMBER_OF_TRIES):  # todo : change the cursor at each loop to have different images at the end
-            print("Painture no : ", j)
+            print("Painting number : ", j)
+            realValue = 0
             # Pick a random background image
             background_image_name = random.choice(background_file_list)
             background_image = Image.open(background_image_name)
@@ -120,6 +122,7 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
             # file_saved = path_to_results + painting_name + str(j) + '.png'
             # background_image.save(file_saved)
             for i in range(r['class_ids'].size):
+                print("Replace a ", MaskRCNNModel.class_names[r['class_ids'][i]])
                 ##
                 # On doit enregistrer l'image à toutes les itérations car la fonction
                 # putpixel ne fonctionne qu'après avoir sauvegardé les changements apportés
@@ -132,10 +135,10 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
 
                 # get image in the painting (as done when generating images)
                 target_image = getSegment(painting, r, i)
-                print(target_image.size)
                 # Pick object that best fit the hole
                 if not target_image is None:
-                    replacement_object = best_image(target_image, object_image_list, cursor)[0] # get the image in an array
+                    replacement_object, result = best_image(target_image, object_image_list, cursor) # get the image in an array
+                    realValue+=result
                     replacement_object = Image.fromarray(replacement_object) # convert to Image
                     #replacement_object = Image.open(random.choice(object_file_list[current_class]))
 
@@ -152,7 +155,7 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
                     # Paste replacement_object into background_image using alpha channel
                     background_image.paste(replacement_object, (r['rois'][i][1], r['rois'][i][0]), replacement_object)
                 else :
-                    print("Attention une image est nulle")
+                    print("Warning : None image")
                 
 
                 # Save background_image.
@@ -160,6 +163,7 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
                     file_saved = path_to_results + painting_name + str(j) + '.png'
                     background_image = background_image.convert("RGB")
                     background_image.save(file_saved)
+                    print("Real value obtained : ", realValue)
                 # else:
                 #    background_image.save(path_to_results + 'temp.png')
 
