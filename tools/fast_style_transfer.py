@@ -58,13 +58,16 @@ def new_load_img(path_to_img: str, max_dim: int = 512):
     """
 
     image = PIL.Image.open(path_to_img)
+    image = image.convert("RGB")
+
     shape = image.size
     long_dim = max(shape)
     scale = max_dim / long_dim
 
     image = image.resize((int(shape[0] * scale), int(shape[1] * scale)), PIL.Image.ANTIALIAS)
     # image.save(path_to_img + "_style.png")
-    image = np.asarray(image)
+    # Make sure to remove transparency layer
+    image = np.asarray(image)[:, :, :3]
 
     return image
 
@@ -82,6 +85,9 @@ def save_image(path_content: str, path_style: str, path_to_save: str, scale_imag
 
     # Load content and style images (see example in the attached colab).
     # https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2
+    # Optionally resize the images. It is recommended that the style image is about
+    # 256 pixels (this size was used when training the style transfer network).
+    # The content image can be any size.
     content_image = new_load_img(path_content, max_dim)
     # style_image = plt.imread(path_style)
     style_image = new_load_img(path_style, max_dim)
@@ -89,12 +95,9 @@ def save_image(path_content: str, path_style: str, path_to_save: str, scale_imag
     if not scale_image:
         content_image = plt.imread(path_content)
 
-    # Convert to float32 numpy array, add batch dimension, and normalize to range [0, 1]. Example using numpy:
+    # Convert to float32 numpy array, add batch dimension, and normalize to range [0, 1].
     content_image = content_image.astype(np.float32)[np.newaxis, ...] / 255.
     style_image = style_image.astype(np.float32)[np.newaxis, ...] / 255.
-    # Optionally resize the images. It is recommended that the style image is about
-    # 256 pixels (this size was used when training the style transfer network).
-    # The content image can be any size.
 
     # Load image stylization module.
     hub_module = tf_hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
