@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.core.fromnumeric import shape
+
+from .barycentre import barycentre
 
 THRESHOLD_RATIO = 10
 
@@ -18,8 +19,8 @@ def best_image(target, image_list:list, cursor:float):
         if (target.size / image_list[i].size) < 1/THRESHOLD_RATIO or (target.size / image_list[i].size) > THRESHOLD_RATIO:
             #print("images too different")
             continue
-        img_gray = cv2.cvtColor(blackAndWhitePNG(image_list[i]),cv2.COLOR_BGR2GRAY)
-        ret,thresh = cv2.threshold(img_gray, 127, 255,0)
+        img_gray_temp = cv2.cvtColor(blackAndWhitePNG(image_list[i]),cv2.COLOR_BGR2GRAY)
+        ret,thresh = cv2.threshold(img_gray_temp, 127, 255,0)
         contours,hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # contour of the image
         if (len(contours) == 0 or len(targetContour) == 0):
             print("error")
@@ -31,7 +32,7 @@ def best_image(target, image_list:list, cursor:float):
             best_indice = i
             best_contour = contours.copy()
 
-    res = applyOrientation(targetContour, best_contour, image_list[best_indice])
+    res = applyOrientation(targetContour, target, best_contour, image_list[best_indice])
     return res, best 
 
 
@@ -79,12 +80,37 @@ def getOrientationAndScale(contour):
     #print("Angle de l'image : ", angle,"deg")
     return angle
 
-def applyOrientation(contour1, contour2, image):
+def applyOrientation(contour1, target, contour2, image):
     angle1 = getOrientationAndScale(contour1)
     angle2 = getOrientationAndScale(contour2)
     angleDiff = angle1 - angle2 # vérifier l'intervalle
     #print("Rotation de :", angleDiff)
-    rotated = rotate_bound(image, angleDiff) 
+    # to if the image is + 180 or not
+    b_img = barycentre(image)
+    b_target = barycentre(target)
+
+    # si les barycentres sont de cotés différents
+    if (b_img[0] < image.shape[0]/2 and b_target[0] > target.shape[0]/2) or (b_img[0]> image.shape[0]/2 and b_target[0]<target.shape[0]/2) : # cas gauche / droite
+        angleDiff +=180
+        print ("+180")
+    elif (b_img[1] < image.shape[1]/2 and b_target[1] > target.shape[1]/2) or (b_img[1]> image.shape[1]/2 and b_target[1]<target.shape[1]/2) :
+        angleDiff +=180
+        print ("+180")
+    print("Angle de rotation : ", angleDiff)
+    rotated = rotate_bound(image, angleDiff, b_img) # first angle
+    """
+    rotated_2 = rotate_bound(image, angleDiff+180) # +180 version
+
+    img_gray_1 = cv2.cvtColor(blackAndWhitePNG(rotated_1),cv2.COLOR_BGR2GRAY) # gray scale to compare
+    img_gray_2 = cv2.cvtColor(blackAndWhitePNG(rotated_2),cv2.COLOR_BGR2GRAY)
+
+    norm_1 = np.linalg.norm(gray - img_gray_1)  # compute the norme to know how much is the difference
+    norm_2 = np.linalg.norm(gray - img_gray_2)
+
+    if norm_1 < norm_2 : # choose the angle that has the minimum différence
+        return rotated_1
+    """
+
     """fig, axs = plt.subplots(1,2)
     axs[0].imshow(scaled)
     axs[0].set_title("rotated")
@@ -98,11 +124,12 @@ def applyOrientation(contour1, contour2, image):
 #
 
 # from https://www.pyimagesearch.com/2017/01/02/rotate-images-correctly-with-opencv-and-python/
-def rotate_bound(image, angle):
+def rotate_bound(image, angle, bar):
     # grab the dimensions of the image and then determine the
     # center
     (h, w) = image.shape[:2]
-    (cX, cY) = (w // 2, h // 2)
+    #(cX, cY) = (w // 2, h // 2)
+    (cX, cY) = bar
     # grab the rotation matrix (applying the negative of the
     # angle to rotate clockwise), then grab the sine and cosine
     # (i.e., the rotation components of the matrix)
