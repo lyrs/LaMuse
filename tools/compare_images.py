@@ -86,19 +86,23 @@ def applyOrientation(contour1, target, contour2, image):
     angleDiff = angle1 - angle2 # vérifier l'intervalle
     #print("Rotation de :", angleDiff)
     # to if the image is + 180 or not
+
+    image = rotate_bound(image, angleDiff) # first angle
+
+    # on vérifie les barycentres pour savoir si on ajoute une rotation de 180 degrés :
+    angleDiff = 0
     b_img = barycentre(image)
     b_target = barycentre(target)
-
-    # si les barycentres sont de cotés différents
     if (b_img[0] < image.shape[0]/2 and b_target[0] > target.shape[0]/2) or (b_img[0]> image.shape[0]/2 and b_target[0]<target.shape[0]/2) : # cas gauche / droite
-        angleDiff +=180
-        print ("+180")
+        angleDiff =180
+        #print ("+180")
     elif (b_img[1] < image.shape[1]/2 and b_target[1] > target.shape[1]/2) or (b_img[1]> image.shape[1]/2 and b_target[1]<target.shape[1]/2) :
-        angleDiff +=180
-        print ("+180")
-    print("Angle de rotation : ", angleDiff)
-    rotated = rotate_bound(image, angleDiff, b_img) # first angle
-    """
+        angleDiff =180
+        #print ("+180")
+
+    image = rotate_bound(image, angleDiff) # first angle
+
+    """ test de l
     rotated_2 = rotate_bound(image, angleDiff+180) # +180 version
 
     img_gray_1 = cv2.cvtColor(blackAndWhitePNG(rotated_1),cv2.COLOR_BGR2GRAY) # gray scale to compare
@@ -117,19 +121,19 @@ def applyOrientation(contour1, target, contour2, image):
     axs[1].imshow(image)
     axs[1].set_title("origin")
     plt.show()"""
-    return rotated
+    return image
 
 #idées pour l'angle : 
 # https://stackoverflow.com/questions/24073127/opencvs-rotatedrect-angle-does-not-provide-enough-information en c++
 #
 
 # from https://www.pyimagesearch.com/2017/01/02/rotate-images-correctly-with-opencv-and-python/
-def rotate_bound(image, angle, bar):
+def rotate_bound(image, angle):#, bar):
     # grab the dimensions of the image and then determine the
     # center
     (h, w) = image.shape[:2]
-    #(cX, cY) = (w // 2, h // 2)
-    (cX, cY) = bar
+    (cX, cY) = (w // 2, h // 2)
+    #(cX, cY) = bar
     # grab the rotation matrix (applying the negative of the
     # angle to rotate clockwise), then grab the sine and cosine
     # (i.e., the rotation components of the matrix)

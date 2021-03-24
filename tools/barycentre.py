@@ -12,27 +12,21 @@ from .MaskRCNNModel import MaskRCNNModel
 
 def barycentre(image): #entrée : Image, Sortie : abssice et ordonnée du barycentre
     #gray_image = blackAndWhitePNG(image)/255
-    print(image.shape)
+    #print(image.shape)
     N = image.shape[0]
     M = image.shape[1]
     bar_abs = 0
     bar_ord = 0
-    cptB=0
-    """for i in range(N):
-        for j in range(M):
-            cptB+=1  
-            bar_abs += i * gray_image[i,j]
-            bar_ord += j * gray_image[i,j]  # add the index if value != 0
-    return (bar_abs, bar_ord)/cptB"""    
+    cptB=0   
     mask = image[:,:,3] == 0  # 1 if transparent else 0
     for i in range(N):
         for j in range(M):
-            if (mask[i,j] == 0): #| image[i, j][1] != 0 | image[i, j][2] != 0 | image[i, j][3] != 0):
+            if (not mask[i,j]): #| image[i, j][1] != 0 | image[i, j][2] != 0 | image[i, j][3] != 0):
                     cptB=cptB+1
                     bar_abs=bar_abs+i
                     bar_ord=bar_ord+j
-    print(N, M)
-    print(bar_abs, bar_ord)
+    #print(N, M)
+    #print(bar_abs, bar_ord)
     if (cptB ==0):
         imshow(image)
         plt.show()
