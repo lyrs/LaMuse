@@ -91,6 +91,7 @@ def applyOrientation(contour1, target, contour2, image):
 
     # on vérifie les barycentres pour savoir si on ajoute une rotation de 180 degrés :
     angleDiff = 0
+    """ pour le moment ne fonctionne que sur les exemples simples
     b_img = barycentre(image)
     b_target = barycentre(target)
     if (b_img[0] < image.shape[0]/2 and b_target[0] > target.shape[0]/2) or (b_img[0]> image.shape[0]/2 and b_target[0]<target.shape[0]/2) : # cas gauche / droite
@@ -98,7 +99,7 @@ def applyOrientation(contour1, target, contour2, image):
         #print ("+180")
     elif (b_img[1] < image.shape[1]/2 and b_target[1] > target.shape[1]/2) or (b_img[1]> image.shape[1]/2 and b_target[1]<target.shape[1]/2) :
         angleDiff =180
-        #print ("+180")
+        #print ("+180")"""
 
     image = rotate_bound(image, angleDiff) # first angle
 
