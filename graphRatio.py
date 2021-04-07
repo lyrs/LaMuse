@@ -11,6 +11,7 @@ from glob import glob
 def comparaisonGraph(ratioMax: int):
     x=[]
     y=[]
+    ratioCorrect = []
 
     path_objects_to_replace = "./LaMuse/BaseImages_objets"
     image_extensions = ["jpg", "gif", "png", "tga"]
@@ -28,23 +29,31 @@ def comparaisonGraph(ratioMax: int):
         x.append(i)
         res_add = 0
         print("Ratio : ", i)
+        k=0
         for j in range(len(object_file_list)-1,0,-200):
             target_image = object_image_list[j]
             object_image_list[j] = empty
-            res = best_image(target_image, object_image_list,0.0, i)[1]
+            res, ratio = best_image(target_image, object_image_list,0.0, i)[1:]
             res_add = res_add + res
             object_image_list[j] = target_image
-        print(len(object_image_list))
-        y.append(res_add/len(object_image_list))
+            k+=1
+        y.append(res_add/k)
+        ratioCorrect.append(ratio)
         #object_image_list = image_list_unchanged.copy()
+    plt.figure(1)
     plt.title("Bizaritude moyenne en fonction du ratio chosit")
     plt.plot(x,y)
+
+    plt.figure(2)
+    plt.title("Nombre d'image correspondant au ratio")
+    plt.plot(x,ratioCorrect)
     plt.show()
 
 # https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
 # return the best image according to target and the value mesuring the shape difference
 def best_image(target, image_list: list, cursor: float, THRESHOLD_RATIO: int):
     best = None  # positive value
+    nbRatioCorrect = 0; 
     #best_contour = None
     best_indice = -1  # indice of the best image
     img_gray = cv2.cvtColor(blackAndWhitePNG(target), cv2.COLOR_BGR2GRAY)
@@ -60,6 +69,7 @@ def best_image(target, image_list: list, cursor: float, THRESHOLD_RATIO: int):
                 target.size / image_list[i].size) > THRESHOLD_RATIO:
             # print("images too different")
             continue
+        nbRatioCorrect+=1
         img_gray_temp = cv2.cvtColor(blackAndWhitePNG(image_list[i]), cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(img_gray_temp, 127, 255, 0)
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)  # contour of the image
@@ -75,7 +85,7 @@ def best_image(target, image_list: list, cursor: float, THRESHOLD_RATIO: int):
     #if (best_contour == None):
         #return(None)
     #res = applyOrientation(targetContour, target, best_contour, image_list[best_indice])
-    return image_list[best_indice], best
+    return image_list[best_indice], best, nbRatioCorrect
 
 
 def blackAndWhitePNG(img):
@@ -86,4 +96,4 @@ def blackAndWhitePNG(img):
     resImg[mask] = [255, 255, 255, 255]  # others -> white (object)
     return resImg
 
-comparaisonGraph(20)
+comparaisonGraph(30)

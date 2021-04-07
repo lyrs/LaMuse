@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 
 from .barycentre import barycentre
 
-THRESHOLD_RATIO = 10
+THRESHOLD_RATIO = 15
 
 # https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
 # return the best image according to target and the value mesuring the shape difference
-def best_image(target, image_list:list, cursor:float):
+def best_image(target:np.ndarray, image_list:list, cursor:float):
+    #print ("Nombre d'images : ", len(image_list))
     best = None # positive value
     best_indice = -1 # indice of the best image
     img_gray = cv2.cvtColor(blackAndWhitePNG(target),cv2.COLOR_BGR2GRAY)
@@ -91,7 +92,7 @@ def applyOrientation(contour1, target, contour2, image):
 
     # on vérifie les barycentres pour savoir si on ajoute une rotation de 180 degrés :
     angleDiff = 0
-    """ pour le moment ne fonctionne que sur les exemples simples
+    #pour le moment ne fonctionne que sur les exemples simples
     b_img = barycentre(image)
     b_target = barycentre(target)
     if (b_img[0] < image.shape[0]/2 and b_target[0] > target.shape[0]/2) or (b_img[0]> image.shape[0]/2 and b_target[0]<target.shape[0]/2) : # cas gauche / droite
@@ -99,7 +100,7 @@ def applyOrientation(contour1, target, contour2, image):
         #print ("+180")
     elif (b_img[1] < image.shape[1]/2 and b_target[1] > target.shape[1]/2) or (b_img[1]> image.shape[1]/2 and b_target[1]<target.shape[1]/2) :
         angleDiff =180
-        #print ("+180")"""
+        #print ("+180")
 
     image = rotate_bound(image, angleDiff) # first angle
 
