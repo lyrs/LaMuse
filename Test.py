@@ -42,14 +42,14 @@ if __name__ == "__main__":
                                                for ext in image_extensions] for y in x])
     
     # test barycenter
-    r = randint(0, len(object_file_list) - 1)
+    """r = randint(0, len(object_file_list) - 1)
     target_file = object_file_list[r]
     target_image = cv2.imread(target_file, cv2.IMREAD_UNCHANGED)
     a,b = barycentre(target_image)
     print(a,b)
     image_bar = visu_Barycentre(target_image,a,b)
     plt.imshow(image_bar)
-    plt.show()
+    plt.show()"""
     
     
     print("nombre total d'images : ", len(object_file_list))

@@ -134,12 +134,19 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
                 #    background_image = Image.open(path_to_results + 'temp.png')
 
                 # get image in the painting (as done when generating images)
+                #box_dimensions = r['rois'][i]
                 target_image = getSegment(painting, r, i)
+
+                # sauvegarder les images
+                #segmented_image = Image.fromarray(target_image)
+                #segmented_image.crop(
+                #    (box_dimensions[1], box_dimensions[0], box_dimensions[3], box_dimensions[2])).save(str(i) + ".png")
+                
                 # Pick object that best fit the hole
                 if not target_image is None:
-                    replacement_object, result = best_image(target_image, object_image_list, cursor) # get the image in an array
+                    result_image, result = best_image(target_image, object_image_list, cursor) # get the image in an array
                     realValue+=result
-                    replacement_object = Image.fromarray(replacement_object) # convert to Image
+                    replacement_object = Image.fromarray(result_image) # convert to Image
                     #replacement_object = Image.open(random.choice(object_file_list[current_class]))
 
                     # Définition des dimensions et du placement du futur objet à coller
