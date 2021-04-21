@@ -60,7 +60,7 @@ if __name__ == "__main__":
     for img in list_images_tigre :
         print("--------------", img, "--------------")
         rotated_image = cv2.imread('./LaMuse/rotate_image_testim/tigre/'+ img +'.png', cv2.IMREAD_UNCHANGED)        
-        finale_image = applyOrientation(cd, default_image, getcontour(rotated_image), rotated_image)
+        finale_image = applyOrientation(getcontour(rotated_image), rotated_image, cd, default_image)
 
         fig, axs = plt.subplots(1, 3)
         fig.suptitle(img)
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     for img in list_images_helico :
         print("--------------", img, "--------------")
         rotated_image = cv2.imread('./LaMuse/rotate_image_testim/helicoptere/'+ img +'.png', cv2.IMREAD_UNCHANGED)        
-        finale_image = applyOrientation(cd, default_image, getcontour(rotated_image), rotated_image)
+        finale_image = applyOrientation(getcontour(rotated_image), rotated_image, cd, default_image)
 
         fig, axs = plt.subplots(1, 3)
         fig.suptitle(img)
