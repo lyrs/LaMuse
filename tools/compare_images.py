@@ -80,17 +80,44 @@ def applyOrientation(target_contour, target, image_contour, image):
     # turn the image in the same direction as the target
     rotated = rotate_bound(image, angleDiff) 
 
-    # Check with the barycenter if the image is flipped
+    # Check with the barycenter whether the image is flipped or not
     angleDiff = 0
     
     b_img = barycentre(image)
     b_target = barycentre(target)
-    if (b_img[0] < image.shape[0]/2 and b_target[0] > target.shape[0]/2) or (b_img[0]> image.shape[0]/2 and b_target[0]<target.shape[0]/2) : # cas gauche / droite
+    margin = 0.05 # margin set to determine whether the barycenter is in the center or not
+
+    # if the barycenter is not in the same side (left / right -> x axis) of both image
+    if ((b_img[0] < image.shape[0]/2 and b_target[0] > target.shape[0]/2) 
+            or (b_img[0]> image.shape[0]/2 and b_target[0]<target.shape[0]/2)):
         angleDiff =180
-        #print ("+180")
-    elif (b_img[1] < image.shape[1]/2 and b_target[1] > target.shape[1]/2) or (b_img[1]> image.shape[1]/2 and b_target[1]<target.shape[1]/2) :
+    # if the barycenter is not in the same side (top / bottom -> y axis) of both image
+    elif ((b_img[1] < image.shape[1]/2 and b_target[1] > target.shape[1]/2) 
+            or (b_img[1]> image.shape[1]/2 and b_target[1]<target.shape[1]/2)):
         angleDiff =180
-        #print ("+180")
+
+    """# rectangle that define the center of the image
+    min_image_x = image.shape[0]/2 - margin * image.shape[0]
+    max_image_x = image.shape[0]/2 + margin * image.shape[0]
+    min_image_y = image.shape[1]/2 - margin * image.shape[1]
+    max_image_y = image.shape[1]/2 + margin * image.shape[1]
+    # rectangle that define the center of the target
+    min_target_x = target.shape[0]/2 - margin * target.shape[0]
+    max_target_x = target.shape[0]/2 + margin * target.shape[0]
+    min_target_y = target.shape[1]/2 - margin * target.shape[1]
+    max_target_y = target.shape[1]/2 + margin * target.shape[1]
+
+    # if the barycenter is not in the same side (left / right -> x axis) of both image
+    if ((b_img[0] < min_image_x and b_target[0] > max_target_x) 
+        or (b_img[0]> max_image_x and b_target[0] < min_target_x)) :
+        angleDiff =180
+        print ("Cas numéro 1 : +180")
+    
+    # if the barycenter is not in the same side (top / bottom -> y axis) of both image
+    if ((b_img[0] < min_image_y and b_target[0] > max_target_y) 
+        or (b_img[0]> max_image_y and b_target[0] < min_target_y)) :
+        angleDiff =180
+        print ("Cas numéro 2 : +180")"""
 
     print("Ajout d'un angle de ", angleDiff, "deg")
     corrected = rotate_bound(rotated, angleDiff) # second rotation if necessary

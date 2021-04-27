@@ -28,11 +28,11 @@ def barycentre(image): #entrée : Image, Sortie : abssice et ordonnée du baryce
     #print(N, M)
     #print(bar_abs, bar_ord)
     if (cptB ==0):
-        imshow(image)
-        plt.show()
-    else:
-        bar_ord=bar_ord/cptB
-        bar_abs=bar_abs/cptB
+        #imshow(image)
+        #plt.show()
+        return -1,-1
+    bar_ord=bar_ord/cptB
+    bar_abs=bar_abs/cptB
     return (int(bar_abs), int(bar_ord))
 
 def visu_Barycentre(image, bar_abs, bar_ord):
