@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from .barycentre import barycentre
 
-THRESHOLD_RATIO = 10
+THRESHOLD_RATIO = 7
 
 # https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
 # return the best image according to target and the value mesuring the shape difference
@@ -62,20 +62,20 @@ def getOrientation(contour):
 
     # get angle from rotated rectangle
     angle = rect[-1]
-    print("Angle de l'image sans traitement : ", angle,"deg")
+    #print("Angle de l'image sans traitement : ", angle,"deg")
     
     # calculate the angle based on the bigger side
     if rect[1][0] < rect[1][1] : # width < height
         angle -= 90
 
-    print("Angle de l'image : ", angle,"deg")
+    #print("Angle de l'image : ", angle,"deg")
     return angle
 
 def applyOrientation(target_contour, target, image_contour, image):
     angle1 = getOrientation(target_contour)
     angle2 = getOrientation(image_contour)
     angleDiff = angle1 - angle2
-    print("Rotation de :", angleDiff)
+    #print("Rotation de :", angleDiff)
 
     # turn the image in the same direction as the target
     rotated = rotate_bound(image, angleDiff) 
@@ -85,7 +85,6 @@ def applyOrientation(target_contour, target, image_contour, image):
     
     b_img = barycentre(image)
     b_target = barycentre(target)
-    margin = 0.05 # margin set to determine whether the barycenter is in the center or not
 
     # if the barycenter is not in the same side (left / right -> x axis) of both image
     if ((b_img[0] < image.shape[0]/2 and b_target[0] > target.shape[0]/2) 
@@ -119,7 +118,7 @@ def applyOrientation(target_contour, target, image_contour, image):
         angleDiff =180
         print ("Cas numéro 2 : +180")"""
 
-    print("Ajout d'un angle de ", angleDiff, "deg")
+    #print("Ajout d'un angle de ", angleDiff, "deg")
     corrected = rotate_bound(rotated, angleDiff) # second rotation if necessary
 
     return corrected

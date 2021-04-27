@@ -47,7 +47,7 @@ if __name__ == "__main__":
         target_image = cv2.imread('./LaMuse/rotate_image_testim/peinture/'+ str(i) +'.png', cv2.IMREAD_UNCHANGED) 
         #print(target_image)
         img = best_image(target_image, object_image_list, 0)[0]
-        fig, axs = plt.subplots(1, 3)
+        fig, axs = plt.subplots(1, 2)
         fig.suptitle(str(i))
         axs[0].imshow(target_image)
         axs[0].set_title("image de base")
