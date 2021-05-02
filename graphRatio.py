@@ -9,6 +9,7 @@ from glob import glob
 
 
 def comparaisonGraph(ratioMax: int):
+    # @TODO : make a graph with time to compare efficiency
     x=[]
     y=[]
     ratioCorrect = []
@@ -96,4 +97,4 @@ def blackAndWhitePNG(img):
     resImg[mask] = [255, 255, 255, 255]  # others -> white (object)
     return resImg
 
-comparaisonGraph(30)
+comparaisonGraph(20)

@@ -11,7 +11,7 @@ from .tools.fast_style_transfer import save_image
 
 segmentation_suffix = "_objets"
 default_image_folder = './LaMuse/BaseImages'
-default_background_folder = './LaMuse/Backgrounds'
+default_background_folder = './LaMuse/BaseImage/Backgrounds'
 default_painting_folder = './LaMuse/Paintings'
 default_interpretation_folder = './Interpretations'
 
@@ -49,7 +49,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
         print("   Calling create_case_study")
 
     create_case_study(painting_folder, substitute_folder,
-                      background_folder, interpretation_folder, 2)
+                      background_folder, interpretation_folder, 1)
 
     if args.verbose:
         print("   Done calling create_case_study")
