@@ -11,12 +11,14 @@ from .tools.fast_style_transfer import save_image
 
 segmentation_suffix = "_objets"
 
-default_image_folder = './BaseImages'
-default_background_folder = default_image_folder + '/Backgrounds'
-default_painting_folder = './Paintings'
+# @Todo: Currently configuration data is packed with the software and stored in the /bin or /lib
+#   directory after installation/deployment. This should be changed to a more convenient location
+default_image_folder = f'{os.path.dirname(__file__)}/BaseImages'
+default_background_folder = f'{os.path.dirname(__file__)}/Backgrounds'
+default_painting_folder = f'{os.path.dirname(__file__)}/Paintings'
 default_interpretation_folder = './Interpretations'
 
-mask_rcnn_config_file = os.path.dirname(__file__) + '/mask_rcnn_coco.h5'
+mask_rcnn_config_file = f'{os.path.dirname(__file__)}/mask_rcnn_coco.h5'
 
 sg.theme('DarkAmber')
 

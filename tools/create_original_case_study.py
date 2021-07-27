@@ -70,7 +70,7 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
     # @Todo find a way to invoke MaskRCNNModel only once
     model = MaskRCNNModel().model
 
-    image_extensions = ["jpg", "gif", "png", "tga"]
+    image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
     painting_file_list = [y for x in [glob(path_to_paintings + '/*.%s' % ext) for ext in image_extensions] for y in x]
 
     # List of available background images
