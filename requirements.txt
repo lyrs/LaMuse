@@ -1,13 +1,12 @@
-numpy~=1.18.5
-tensorflow~=2.3.1
-keras~=2.4.3
-scipy~=1.4.1
-matplotlib~=3.2.2
-ipython~=7.13.0
-pip~=20.2.4
-setuptools~=47.1.1
-Pillow~=7.0.0
-opencv-python~=4.5.1.48
+numpy==1.21.2
+tensorflow==2.6.0
+scipy==1.7.1
+matplotlib==3.4.3
+ipython==7.26.0
+pip==21.2.4
+setuptools==57.4.0
+Pillow~=8.3
+opencv-python==4.5.3.56
 
-PySimpleGUI~=4.34.0
-Pygments~=2.7.2
+PySimpleGUI==4.46.0
+Pygments==2.10.0
