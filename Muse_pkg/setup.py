@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="LaMuse", 
-    version="0.0.7",
+    version="0.0.8",
     author="Bart Lamiroy",
     author_email="Bart.Lamiroy@univ-reims.fr",
     description="LaMuse, deep learning for painters",
@@ -19,6 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    include_package_data=True,
-    package_data={'': ['mask_rcnn_coco.h5', 'BaseImages_objets/*/*png']},
+    package_data={'LaMuse': ['mask_rcnn_coco.h5', 'BaseImages_objets/*/*png', 'Paintings/*']},
 )
