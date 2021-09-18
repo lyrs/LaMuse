@@ -9,6 +9,9 @@ def add_watermark(img: np.ndarray, path_to_watermark: str = "./Watermark.png") -
     new_dim = (imgWidth, imgHeight)
 
     overlay = cv2.imread(path_to_watermark, cv2.IMREAD_UNCHANGED)
+    if overlay is None or overlay.size == 0:
+        raise OSError("Trying to read {} returns empty image".format(path_to_watermark))
+
     overlay = cv2.resize(overlay, new_dim, interpolation=cv2.INTER_AREA)
 
     # Extract the RGB channels
