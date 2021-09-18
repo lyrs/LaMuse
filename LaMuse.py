@@ -26,6 +26,8 @@ default_watermark_file = f'{os.path.dirname(__file__)}/Watermark.png'
 
 mask_rcnn_config_file = f'{os.path.dirname(__file__)}/mask_rcnn_coco.h5'
 
+version_number = '0.1.0'
+
 sg.theme('DarkAmber')
 
 layout = [[sg.Text("Dossier d'images substituts"), sg.Input(), sg.FolderBrowse(initial_folder=".")],
@@ -134,6 +136,7 @@ if __name__ == "__main__":
     parser.add_argument("--demo", action='store_true', help='Run in demo mode, reducing features to bare minimum')
     parser.add_argument("--nogui", action='store_true', help='Run in no-gui mode')
     parser.add_argument("--verbose", action='store_true', help='Display trace messages')
+    parser.add_argument('--version', action='version', version='%(prog)s {}'.format(version_number))
     parser.add_argument("--watermark", "-wm", type=str, nargs='?', const=default_watermark_file,
                         help='watermark file (defaults to "' + default_watermark_file + '" if non specified)')
 
