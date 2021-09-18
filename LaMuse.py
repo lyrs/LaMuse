@@ -22,7 +22,7 @@ default_image_folder = f'{os.path.dirname(__file__)}/BaseImages'
 default_background_folder = f'{os.path.dirname(__file__)}/Backgrounds'
 default_painting_folder = f'{os.path.dirname(__file__)}/Paintings'
 default_interpretation_folder = './Interpretations'
-default_watermark_file = './Watermark.png'
+default_watermark_file = f'{os.path.dirname(__file__)}/Watermark.png'
 
 mask_rcnn_config_file = f'{os.path.dirname(__file__)}/mask_rcnn_coco.h5'
 
