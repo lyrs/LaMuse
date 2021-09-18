@@ -33,5 +33,11 @@ Pour lancer un exécutable, il faut donc faire :
 
 ``python3 -m LaMuse --demo``
 
+## Troubleshooting
+
+* `AttributeError: module 'keras.engine' has no attribute 'Layer'`
+
+    
+
 ## _Front_
 

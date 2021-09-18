@@ -19,5 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    package_data={'LaMuse': ['mask_rcnn_coco.h5', 'BaseImages_objets/*/*png', 'Paintings/*']},
+    package_data={'LaMuse': ['mask_rcnn_coco.h5', 'BaseImages_objets/*/*png', 'Paintings/*', 'Watermark.png']},
 )
