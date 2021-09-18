@@ -1,3 +1,4 @@
+import sys
 from glob import glob
 import os
 import errno
@@ -9,6 +10,10 @@ from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import save_image
 
+import cv2
+
+from .tools.watermarking import add_watermark
+
 segmentation_suffix = "_objets"
 
 # @Todo: Currently configuration data is packed with the software and stored in the /bin or /lib
@@ -17,6 +22,7 @@ default_image_folder = f'{os.path.dirname(__file__)}/BaseImages'
 default_background_folder = f'{os.path.dirname(__file__)}/Backgrounds'
 default_painting_folder = f'{os.path.dirname(__file__)}/Paintings'
 default_interpretation_folder = './Interpretations'
+default_watermark_file = './Watermark.png'
 
 mask_rcnn_config_file = f'{os.path.dirname(__file__)}/mask_rcnn_coco.h5'
 
@@ -61,7 +67,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     # Go over all images in 'default_painting_folder' and the corresponding images in
     # 'default_interpretation_folder' and apply a style transfer.
     ##
-    image_extensions = ["jpg", "gif", "png", "tga"]
+    image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
     painting_file_list = [y for x in [glob(painting_folder + '/*.%s' % ext) for ext in image_extensions]
                           for y in x]
 
@@ -80,13 +86,22 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             # adopt the same style as 'painting'
             # The result is stored in 'interpretation'
             ##
+
             if args.verbose:
-                print("    Saving " + interpretation)
+                print("    Saving {}".format(interpretation))
 
             save_image(interpretation, painting, interpretation)
 
             if args.verbose:
-                print("    Done saving " + interpretation)
+                print("    Done saving {}".format(interpretation))
+
+            if args.watermark:
+                if args.verbose:
+                    print("    Adding watermark {}".format(args.watermark))
+
+                image = cv2.imread(interpretation, cv2.IMREAD_UNCHANGED)
+                image = add_watermark(image, args.watermark)
+                cv2.imwrite(interpretation+".wm.png", image)
 
 
 if __name__ == "__main__":
@@ -119,6 +134,8 @@ if __name__ == "__main__":
     parser.add_argument("--demo", action='store_true', help='Run in demo mode, reducing features to bare minimum')
     parser.add_argument("--nogui", action='store_true', help='Run in no-gui mode')
     parser.add_argument("--verbose", action='store_true', help='Display trace messages')
+    parser.add_argument("--watermark", "-wm", type=str, nargs='?', const=default_watermark_file,
+                        help='watermark file (defaults to "' + default_watermark_file + '" if non specified)')
 
     args = parser.parse_args()
 
