@@ -90,16 +90,16 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             ##
 
             if args.verbose:
-                print("    Saving {}".format(interpretation))
+                print(f'    Saving {interpretation}')
 
             save_image(interpretation, painting, interpretation)
 
             if args.verbose:
-                print("    Done saving {}".format(interpretation))
+                print(f'    Done saving {interpretation}')
 
             if args.watermark:
                 if args.verbose:
-                    print("    Adding watermark {}".format(args.watermark))
+                    print(f'    Adding watermark {args.watermark}')
 
                 image = cv2.imread(interpretation, cv2.IMREAD_UNCHANGED)
                 image = add_watermark(image, args.watermark)
