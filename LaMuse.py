@@ -103,7 +103,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
 
                 image = cv2.imread(interpretation, cv2.IMREAD_UNCHANGED)
                 image = add_watermark(image, args.watermark)
-                cv2.imwrite(interpretation+".wm.png", image)
+                cv2.imwrite(interpretation, image)
 
 
 if __name__ == "__main__":
