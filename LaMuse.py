@@ -58,7 +58,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     # Go over all images in 'default_painting_folder' and the corresponding images in
     # 'default_interpretation_folder' and apply a style transfer.
     ##
-    image_extensions = ["jpg", "gif", "png", "tga"]
+    image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
     painting_file_list = [y for x in [glob(painting_folder + '/*.%s' % ext) for ext in image_extensions]
                           for y in x]
 
