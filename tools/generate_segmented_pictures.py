@@ -33,7 +33,7 @@ def generate_images(source_path: str, destination_path: str) -> None:
         os.mkdir(destination_path)
 
     model = MaskRCNNModel().model
-    compteur = 0
+    counter = 0
 
     # Iterate over all files in source_path
     # @Todo : verify that all files are effectively images, handle errors
@@ -81,15 +81,15 @@ def generate_images(source_path: str, destination_path: str) -> None:
                 masked_image = getSegment(img, r, obj_idx)
                 segmented_image = Image.fromarray(masked_image)
 
-                # print(filename, r['masks'][:, :, 0].shape[0], r['masks'][:, :, 0].shape[1], MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(compteur) + "_" + str(obj_idx) + ".png")
+                # print(filename, r['masks'][:, :, 0].shape[0], r['masks'][:, :, 0].shape[1], MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(counter) + "_" + str(obj_idx) + ".png")
 
                 # Good dimensions crop([1], [0], [3], [2]) !
                 segmented_image.crop(
                     (box_dimensions[1], box_dimensions[0], box_dimensions[3], box_dimensions[2])).save(
-                     destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(compteur) + "_" +
+                     destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(counter) + "_" +
                             str(obj_idx) + ".png")
 
-            compteur += 1
+            counter += 1
 
 # Give the mask for the element at 'index' in the image 'img' with the result array 'r'
 def getSegment(img, r, index):
