@@ -9,13 +9,23 @@ from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import save_image
 
-segmentation_suffix = "_objets"
-default_image_folder = './LaMuse/BaseImages'
-default_background_folder = './LaMuse/BaseImage/Backgrounds'
-default_painting_folder = './LaMuse/Paintings'
-default_interpretation_folder = './Interpretations'
+import cv2
 
-mask_rcnn_config_file = os.path.dirname(__file__) + '/mask_rcnn_coco.h5'
+from .tools.watermarking import add_watermark
+
+segmentation_suffix = "_objets"
+
+# @Todo: Currently configuration data is packed with the software and stored in the /bin or /lib
+#   directory after installation/deployment. This should be changed to a more convenient location
+default_image_folder = f'{os.path.dirname(__file__)}/BaseImages'
+default_background_folder = f'{os.path.dirname(__file__)}/Backgrounds'
+default_painting_folder = f'{os.path.dirname(__file__)}/Paintings'
+default_interpretation_folder = './Interpretations'
+default_watermark_file = f'{os.path.dirname(__file__)}/Watermark.png'
+
+mask_rcnn_config_file = f'{os.path.dirname(__file__)}/mask_rcnn_coco.h5'
+
+version_number = '0.2.0'
 
 sg.theme('DarkAmber')
 
@@ -78,12 +88,20 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             # The result is stored in 'interpretation'
             ##
             if args.verbose:
-                print("    Saving " + interpretation)
+                print(f'    Saving {interpretation}')
 
             save_image(interpretation, painting, interpretation)
 
             if args.verbose:
-                print("    Done saving " + interpretation)
+                print(f'    Done saving {interpretation}')
+
+            if args.watermark:
+                if args.verbose:
+                    print(f'    Adding watermark {args.watermark}')
+
+                image = cv2.imread(interpretation, cv2.IMREAD_UNCHANGED)
+                image = add_watermark(image, args.watermark)
+                cv2.imwrite(interpretation, image)
 
 
 if __name__ == "__main__":
@@ -116,6 +134,9 @@ if __name__ == "__main__":
     parser.add_argument("--demo", action='store_true', help='Run in demo mode, reducing features to bare minimum')
     parser.add_argument("--nogui", action='store_true', help='Run in no-gui mode')
     parser.add_argument("--verbose", action='store_true', help='Display trace messages')
+    parser.add_argument('--version', action='version', version='%(prog)s {}'.format(version_number))
+    parser.add_argument("--watermark", "-wm", type=str, nargs='?', const=default_watermark_file,
+                        help='watermark file (defaults to "' + default_watermark_file + '" if non specified)')
 
     args = parser.parse_args()
 
