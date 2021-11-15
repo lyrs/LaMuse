@@ -24,52 +24,26 @@ from keras.preprocessing.image import img_to_array
 
 from .MaskRCNNModel import MaskRCNNModel
 
-#object_file_list = {}
+# object_file_list = {}
 object_image_list_nested = {}
 object_image_list = []
 
-# draw an image with detected objects
-
-def draw_image_with_boxes(filename: str, boxes_list: list) -> None:
-    """
-    :param filename:
-    :param boxes_list:
-    :return:
-    """
-    # load the image
-    data = plt.imread(filename)
-    # plot the image
-    plt.imshow(data)
-    # get the context for drawing boxes
-    ax = plt.gca()
-    # plot each box
-    for box in boxes_list:
-        # get coordinates
-        y1, x1, y2, x2 = box
-        # calculate width and height of the box
-        width, height = x2 - x1, y2 - y1
-        # create the shape
-        rect = Rectangle((x1, y1), width, height, fill=False, color='red', lw=5)
-        # draw the box
-        ax.add_patch(rect)
-    # show the plot
-    plt.show()
 
 # replace the objects on the background using shapes corresponding to the painting
-def createImageWithShapes(background_image, painting, r, cursor):
+def create_image_with_shapes(background_image, painting, r, cursor):
     # @TODO : find how to make images not looking blue
-    
-    nbElement = r['class_ids'].size
-    # dispach the value of the cursor between all elements
-    if nbElement != 0:
-        cursor = cursor / nbElement
 
-    for i in range(nbElement):
+    nb_element = r['class_ids'].size
+    # dispach the value of the cursor between all elements
+    if nb_element != 0:
+        cursor = cursor / nb_element
+
+    for i in range(nb_element):
         print("Replace a ", MaskRCNNModel.class_names[r['class_ids'][i]])
-        realValue = 0
+        real_value = 0
 
         segment = getSegment(painting, r, i)
-        target_image = segment[r['rois'][i][0] : r['rois'][i][2], r['rois'][i][1] : r['rois'][i][3]] #crop the image
+        target_image = segment[r['rois'][i][0]: r['rois'][i][2], r['rois'][i][1]: r['rois'][i][3]]  # crop the image
         """fig, axs = plt.subplots(1, 2)
         fig.suptitle(str(i))
         axs[0].imshow(target_image)
@@ -79,10 +53,10 @@ def createImageWithShapes(background_image, painting, r, cursor):
         plt.show()"""
 
         # Pick object that best fit the hole
-        if not target_image is None:
+        if target_image is not None:
             # get the image with the best shape
-            result_image, result = best_image(target_image, object_image_list, cursor) 
-            realValue+=result
+            result_image, result = best_image(target_image, object_image_list, cursor)
+            real_value += result
             """fig, axs = plt.subplots(1, 2)
             fig.suptitle(str(i))
             axs[0].imshow(target_image)
@@ -91,7 +65,7 @@ def createImageWithShapes(background_image, painting, r, cursor):
             axs[1].set_title("image modèle")
             plt.show()"""
 
-            replacement_object = Image.fromarray(result_image) # convert to Image     
+            replacement_object = Image.fromarray(result_image)  # convert to Image
 
             # Définition des dimensions et du placement du futur objet à coller
             original_object_bbox = (r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2])
@@ -100,37 +74,38 @@ def createImageWithShapes(background_image, painting, r, cursor):
 
             # Resizing replacement_object to original_object dimensions.
             replacement_object = replacement_object.resize((original_object_width, original_object_height),
-                                                        Image.ANTIALIAS)
+                                                           Image.ANTIALIAS)
 
             # Paste replacement_object into background_image using alpha channel
             background_image.paste(replacement_object, (r['rois'][i][1], r['rois'][i][0]), replacement_object)
-        else :
+        else:
             print("Warning : None image")
 
-    return background_image, realValue
+    return background_image, real_value
 
-def createImageWithCategoriesAndShapes(background_image, painting, r, cursor):
-    nbElement = r['class_ids'].size
+
+def create_image_with_categories_and_shapes(background_image, painting, r, cursor):
+    nb_element = r['class_ids'].size
     # dispach the value of the cursor between all elements
-    if nbElement != 0:
-        cursor = cursor / nbElement
+    if nb_element != 0:
+        cursor = cursor / nb_element
 
-    for i in range(nbElement):
+    for i in range(nb_element):
 
         current_class = MaskRCNNModel.class_names[r['class_ids'][i]]
         print("Replace a ", current_class)
-        realValue = 0
+        real_value = 0
 
         segment = getSegment(painting, r, i)
-        target_image = segment[r['rois'][i][0] : r['rois'][i][2], r['rois'][i][1] : r['rois'][i][3]] #crop the image
+        target_image = segment[r['rois'][i][0]: r['rois'][i][2], r['rois'][i][1]: r['rois'][i][3]]  # crop the image
 
         # Pick object that best fit the hole
-        if not target_image is None:
+        if target_image is not None:
             # get the image with the best shape
-            result_image, result = best_image(target_image, object_image_list_nested[current_class], cursor) 
-            realValue+=result
+            result_image, result = best_image(target_image, object_image_list_nested[current_class], cursor)
+            real_value += result
 
-            replacement_object = Image.fromarray(result_image) # convert to Image     
+            replacement_object = Image.fromarray(result_image)  # convert to Image
 
             # Définition des dimensions et du placement du futur objet à coller
             original_object_bbox = (r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2])
@@ -139,19 +114,20 @@ def createImageWithCategoriesAndShapes(background_image, painting, r, cursor):
 
             # Resizing replacement_object to original_object dimensions.
             replacement_object = replacement_object.resize((original_object_width, original_object_height),
-                                                        Image.ANTIALIAS)
+                                                           Image.ANTIALIAS)
 
             # Paste replacement_object into background_image using alpha channel
             background_image.paste(replacement_object, (r['rois'][i][1], r['rois'][i][0]), replacement_object)
-        else :
+        else:
             print("Warning : None image")
 
-    return background_image, realValue
+    return background_image, real_value
+
 
 # replace the objects on the background using categories corresponding to the painting
-def createImageWithCategories(background_image, painting, r, cursor):
+def create_image_with_categories(background_image, painting, r, cursor):
     for i in range(r['class_ids'].size):
-               
+
         current_class = MaskRCNNModel.class_names[r['class_ids'][i]]
         print("Replace a ", current_class)
 
@@ -160,7 +136,7 @@ def createImageWithCategories(background_image, painting, r, cursor):
         try:
             replacement_object = Image.fromarray(random.choice(object_image_list_nested[current_class]))
         except IndexError:
-            print("Cannot find", current_class)#, "in", path_objects_to_replace, "for", painting_name)
+            print("Cannot find", current_class)  # , "in", path_objects_to_replace, "for", painting_name)
             break
         # Définition des dimensions et du placement du futur objet à coller
         original_object_bbox = (r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2])
@@ -169,7 +145,7 @@ def createImageWithCategories(background_image, painting, r, cursor):
 
         # Resizing replacement_object to original_object dimensions.
         replacement_object = replacement_object.resize((original_object_width, original_object_height),
-                                                        Image.ANTIALIAS)
+                                                       Image.ANTIALIAS)
 
         # Paste replacement_object into background_image using alpha channel
         background_image.paste(replacement_object, (r['rois'][i][1], r['rois'][i][0]), replacement_object)
@@ -192,10 +168,11 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
 
     cursor = 0
     cursor_step = 0
-    if (nb_paintings != 1):
-        cursor_step = 20/(nb_paintings-1) # cursor values in [0,20]
+    if nb_paintings != 1:
+        cursor_step = 20 / (nb_paintings - 1)  # cursor values in [0,20]
 
-    listOfMethods = [createImageWithShapes] * nb_paintings + [createImageWithCategoriesAndShapes] * nb_paintings + [createImageWithCategories] * nb_paintings
+    list_of_methods = [create_image_with_shapes] * nb_paintings + [create_image_with_categories_and_shapes] * nb_paintings + [
+        create_image_with_categories] * nb_paintings
     method_names = ["shapes", "shapes and categories", "categories"]
 
     if not os.path.exists(path_to_results):
@@ -211,20 +188,20 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
     background_file_list = \
         [y for x in [glob(path_to_background_images + '/*.%s' % ext) for ext in image_extensions] for y in x]
 
-    if (len(object_image_list) == 0 or len (object_image_list_nested) == 0):
+    if len(object_image_list) == 0 or len(object_image_list_nested) == 0:
         print("Updating objects...")
         # List of candidate replacement objects
         for obj in MaskRCNNModel.class_names:
-            #object_file_list[obj] = [y for x in [glob(path_objects_to_replace + '/%s/*.%s' % (obj, ext))
-                                                #for ext in image_extensions] for y in x]
+            # object_file_list[obj] = [y for x in [glob(path_objects_to_replace + '/%s/*.%s' % (obj, ext))
+            # for ext in image_extensions] for y in x]
             file_list = [y for x in [glob(path_objects_to_replace + '/%s/*.%s' % (obj, ext))
-                                                for ext in image_extensions] for y in x]
+                                     for ext in image_extensions] for y in x]
             object_image_list_nested[obj] = [cv2.imread(i, cv2.IMREAD_UNCHANGED) for i in file_list]
             [object_image_list.append(img) for img in object_image_list_nested[obj]]
-        #for nested_list in object_file_list.values():
-            #for i in nested_list:
-                #object_image_list.append(cv2.imread(i, cv2.IMREAD_UNCHANGED))
-    
+        # for nested_list in object_file_list.values():
+        # for i in nested_list:
+        # object_image_list.append(cv2.imread(i, cv2.IMREAD_UNCHANGED))
+
     for painting_filename in painting_file_list:
         print("\nPainting : ", painting_filename)
         painting_name = os.path.basename(painting_filename)
@@ -237,12 +214,12 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
         r = results[0]
 
         cursor = 0
-        j=0
+        j = 0
 
         # Generate a number of altered forms of painting for each technics
-        for technic in listOfMethods:
+        for technic in list_of_methods:
             print("Painting number : ", j)
-            
+
             # Pick a random background image
             try:
                 background_image_name = random.choice(background_file_list)
@@ -254,18 +231,19 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
             # Resize the background image with the size of painting.
             background_image = background_image.resize((painting_width, painting_height), Image.ANTIALIAS)
             background_image = background_image.convert("RGBA")
-            
-            background_image, realValue = technic(background_image, painting, r, cursor)
-            #background_image, realValue = createImageWithShapes(background_image, painting, r, cursor)
+
+            background_image, real_value = technic(background_image, painting, r, cursor)
+            # background_image, real_value = create_image_with_shapes(background_image, painting, r, cursor)
 
             # Save background_image.
-            file_saved = path_to_results + painting_name + "-method=" + method_names[j//nb_paintings] + "-value=" + '%.3f' % realValue + '.png'
+            file_saved = path_to_results + painting_name + "-method=" + method_names[
+                j // nb_paintings] + "-value=" + '%.3f' % real_value + '.png'
             background_image = background_image.convert("RGB")
             background_image.save(file_saved)
 
-            print("Real value obtained : ", realValue)
-            cursor+=cursor_step #to have different result for an image
-            j+=1
+            print("Real value obtained : ", real_value)
+            cursor += cursor_step  # to have different result for an image
+            j += 1
 
 
 if __name__ == "__main__":

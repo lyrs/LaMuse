@@ -1,31 +1,17 @@
 from glob import glob
-import os
+import cv2
 import errno
 import argparse
 import pkg_resources
 
 import PySimpleGUI as sg
+
 from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import save_image
-
-import cv2
-
 from .tools.watermarking import add_watermark
 
-segmentation_suffix = "_objets"
-
-# @Todo: Currently configuration data is packed with the software and stored in the /bin or /lib
-#   directory after installation/deployment. This should be changed to a more convenient location
-default_image_folder = f'{os.path.dirname(__file__)}/BaseImages'
-default_background_folder = f'{os.path.dirname(__file__)}/Backgrounds'
-default_painting_folder = f'{os.path.dirname(__file__)}/Paintings'
-default_interpretation_folder = './Interpretations'
-default_watermark_file = f'{os.path.dirname(__file__)}/Watermark.png'
-
-mask_rcnn_config_file = f'{os.path.dirname(__file__)}/mask_rcnn_coco.h5'
-
-version_number = '0.2.0'
+from .setup import *
 
 sg.theme('DarkAmber')
 
@@ -68,7 +54,6 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     # Go over all images in 'default_painting_folder' and the corresponding images in
     # 'default_interpretation_folder' and apply a style transfer.
     ##
-    image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
     painting_file_list = [y for x in [glob(painting_folder + '/*.%s' % ext) for ext in image_extensions]
                           for y in x]
 
@@ -198,8 +183,6 @@ if __name__ == "__main__":
                     default_painting_folder = values[1]
                 if values[2]:
                     default_background_folder = values[2]
-                else:
-                    default_background_folder = default_image_folder + '/Backgrounds'
 
                 sg.Popup("La génération de cas d'étude a commencé, en fonction du nombre de peintures fournies ceci "
                          "peut prendre un certain temps", title="Création démarrée", non_blocking=True)
