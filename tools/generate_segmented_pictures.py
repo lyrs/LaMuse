@@ -27,7 +27,8 @@ def generate_images(source_path: str, destination_path: str) -> None:
     assert destination_path != ""
 
     image_extensions = ["jpg", "gif", "png", "tga"]
-    image_list = [y for x in [glob(source_path + '/**/*.%s' % ext, recursive=True) for ext in image_extensions] for y in x]
+    image_list = [y for x in [glob(source_path + '/**/*.%s' % ext, recursive=True) for ext in image_extensions] for y in
+                  x]
 
     if not os.path.exists(destination_path):
         os.mkdir(destination_path)
@@ -67,7 +68,7 @@ def generate_images(source_path: str, destination_path: str) -> None:
         if r['class_ids'].size > 0:
 
             for c in r['class_ids']:
-                new_path = destination_path+'/'+MaskRCNNModel.class_names[c]
+                new_path = destination_path + '/' + MaskRCNNModel.class_names[c]
                 if not os.path.exists(new_path):
                     os.mkdir(new_path)
 
@@ -78,7 +79,7 @@ def generate_images(source_path: str, destination_path: str) -> None:
                 if box_area < min_area:
                     break
 
-                masked_image = getSegment(img, r, obj_idx)
+                masked_image = get_segmented_mask(img, r, obj_idx)
                 segmented_image = Image.fromarray(masked_image)
 
                 # print(filename, r['masks'][:, :, 0].shape[0], r['masks'][:, :, 0].shape[1], MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(counter) + "_" + str(obj_idx) + ".png")
@@ -86,20 +87,28 @@ def generate_images(source_path: str, destination_path: str) -> None:
                 # Good dimensions crop([1], [0], [3], [2]) !
                 segmented_image.crop(
                     (box_dimensions[1], box_dimensions[0], box_dimensions[3], box_dimensions[2])).save(
-                     destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(counter) + "_" +
-                            str(obj_idx) + ".png")
+                    destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(
+                        counter) + "_" +
+                    str(obj_idx) + ".png")
 
             counter += 1
 
-# Give the mask for the element at 'index' in the image 'img' with the result array 'r'
-def getSegment(img, r, index):
+
+def get_segmented_mask(img: np.ndarray, r: dict, index: int) -> np.ndarray:
+    """
+    Retrieve the mask for the element at 'index' in the image 'img' with the result array 'r'
+    :param img: image from which to retrieve the shape mask
+    :param r: pre-computed segementation results
+    :param index: index of segmented shape to retrieve
+    :return: mask image of segmented shape with background pixels set to (0, 0, 0, 0)
+    """
     masked_image = np.full(img.shape, (0, 0, 0), np.uint8)
 
     for c in range(3):
         masked_image[:, :, c] = np.where(r['masks'][:, :, index] == 1,
-                                            img[:, :, c], 0)
+                                         img[:, :, c], 0)
 
-    #segmented_image = Image.new("RGBA", masked_image)
+    # segmented_image = Image.new("RGBA", masked_image)
 
     ##
     # following lines adapted from https://stackoverflow.com/questions/54703674/how-do-i-make-my-numpy-image-take-an-alpha-channel-value-in-python

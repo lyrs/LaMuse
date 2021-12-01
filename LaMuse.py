@@ -8,7 +8,7 @@ import PySimpleGUI as sg
 
 from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
-from .tools.fast_style_transfer import save_image
+from .tools.fast_style_transfer import apply_style_transfer
 from .tools.watermarking import add_watermark
 
 from .setup import *
@@ -75,7 +75,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             if args.verbose:
                 print(f'    Saving {interpretation}')
 
-            save_image(interpretation, painting, interpretation)
+            apply_style_transfer(interpretation, painting, interpretation)
 
             if args.verbose:
                 print(f'    Done saving {interpretation}')

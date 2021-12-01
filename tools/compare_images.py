@@ -4,11 +4,12 @@ import numpy as np
 from .barycentre import barycentre
 
 
-def best_image(target: np.ndarray, image_list: list, cursor: float, THRESHOLD_RATIO: float = 7):
+def best_image(target: np.ndarray, image_list: list, cursor: float, THRESHOLD_RATIO: float = 7) -> tuple:
     """
     from https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
 
     return the best image according to target and the value measuring the shape difference
+    Images are supposed to be template images with transparent background
 
     :param target:
     :param image_list:
@@ -77,11 +78,17 @@ def transparancy_mask_to_BW(img: np.ndarray) -> np.ndarray:
     return res_img
 
 
-# from https://stackoverflow.com/questions/58632469/how-to-find-the-orientation-of-an-object-shape-python-opencv
-def get_orientation(contour):
+def get_orientation(contours: list) -> float:
+    """
+    Computes and returns the orientation angle (in degrees) of the largest component in the provided contour list
+    (from https://stackoverflow.com/questions/58632469/how-to-find-the-orientation-of-an-object-shape-python-opencv)
+
+    :param contours: list of contours
+    :return: orientation angle of the minimal surrounding rectangle (taken at its largest side)
+    """
     # get rotated rectangle from outer contour
-    larger_contour = contour[0]
-    for i in contour:
+    larger_contour = contours[0]
+    for i in contours:
         if i.shape > larger_contour.shape:
             larger_contour = i
     # print("Contour choisi : ", larger_contour.shape)

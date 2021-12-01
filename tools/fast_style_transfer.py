@@ -73,7 +73,7 @@ def new_load_img(path_to_img: str, max_dim: int = 512):
     return image
 
 
-def save_image(path_content: str, path_style: str, path_to_save: str, scale_image: bool = True) -> None:
+def apply_style_transfer(path_content: str, path_style: str, path_to_save: str, scale_image: bool = True) -> None:
     """
     :param path_content:
     :param path_style:
@@ -114,7 +114,7 @@ def save_image(path_content: str, path_style: str, path_to_save: str, scale_imag
     stylized_image = tf.cast(outputs[0] * 255, dtype=tf.uint8).numpy()[0]
     stylized_image = PIL.Image.fromarray(stylized_image)
     stylized_image = stylized_image.convert("RGBA")
-    stylized_image.save(path_to_save + "_stylized.png")
+    stylized_image.save(path_to_save)
 
     # Stylize image (scaled).
     # outputs_scaled = hub_module(tf.constant(content_image_scaled), tf.constant(style_image))

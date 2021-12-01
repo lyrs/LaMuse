@@ -29,7 +29,7 @@ def barycentre(image):  # entrée : Image, Sortie : abssice et ordonnée du bary
                 bar_ord = bar_ord + j
     # print(N, M)
     # print(bar_abs, bar_ord)
-    if (cptB == 0):
+    if cptB == 0:
         # imshow(image)
         # plt.show()
         return -1, -1

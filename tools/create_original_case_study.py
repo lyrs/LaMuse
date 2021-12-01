@@ -10,7 +10,8 @@ from tensorflow.python.keras.backend import reset_uids
 # tf.disable_v2_behavior()
 
 from .compare_images import best_image
-from .generate_segmented_pictures import getSegment
+from .generate_segmented_pictures import get_segmented_mask
+from ..setup import *
 
 from PIL import Image
 import random
@@ -29,21 +30,32 @@ object_image_list_nested = {}
 object_image_list = []
 
 
-# replace the objects on the background using shapes corresponding to the painting
-def create_image_with_shapes(background_image, painting, r, cursor):
+def create_image_with_shapes(background_image: np.ndarray, painting: np.ndarray, r: dict, cursor) -> tuple:
+    """
+    Replace the objects on the background using shapes corresponding to the painting
+
+    :param background_image:
+    :param painting:
+    :param r:
+    :param cursor:
+    :return:
+    """
     # @TODO : find how to make images not looking blue
 
     nb_element = r['class_ids'].size
+    real_value = None
+
     # dispach the value of the cursor between all elements
     if nb_element != 0:
         cursor = cursor / nb_element
 
     for i in range(nb_element):
-        print("Replace a ", MaskRCNNModel.class_names[r['class_ids'][i]])
-        real_value = 0
+        # print("Replace a ", MaskRCNNModel.class_names[r['class_ids'][i]])
+        # @TODO: find out why real_value is reset to 0.0
+        real_value = 0.0
 
-        segment = getSegment(painting, r, i)
-        target_image = segment[r['rois'][i][0]: r['rois'][i][2], r['rois'][i][1]: r['rois'][i][3]]  # crop the image
+        shape_mask = get_segmented_mask(painting, r, i)
+        cropped_shape = shape_mask[r['rois'][i][0]: r['rois'][i][2], r['rois'][i][1]: r['rois'][i][3]]  # crop the image
         """fig, axs = plt.subplots(1, 2)
         fig.suptitle(str(i))
         axs[0].imshow(target_image)
@@ -53,9 +65,10 @@ def create_image_with_shapes(background_image, painting, r, cursor):
         plt.show()"""
 
         # Pick object that best fit the hole
-        if target_image is not None:
+        if cropped_shape is not None:
             # get the image with the best shape
-            result_image, result = best_image(target_image, object_image_list, cursor)
+            # @TODO get rid of this global 'object_image_list' varaible
+            replacement_shape, result, _ = best_image(cropped_shape, object_image_list, cursor)
             real_value += result
             """fig, axs = plt.subplots(1, 2)
             fig.suptitle(str(i))
@@ -65,7 +78,7 @@ def create_image_with_shapes(background_image, painting, r, cursor):
             axs[1].set_title("image modèle")
             plt.show()"""
 
-            replacement_object = Image.fromarray(result_image)  # convert to Image
+            replacement_object = Image.fromarray(replacement_shape)  # convert to Image
 
             # Définition des dimensions et du placement du futur objet à coller
             original_object_bbox = (r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2])
@@ -86,6 +99,7 @@ def create_image_with_shapes(background_image, painting, r, cursor):
 
 def create_image_with_categories_and_shapes(background_image, painting, r, cursor):
     nb_element = r['class_ids'].size
+    real_value = None
     # dispach the value of the cursor between all elements
     if nb_element != 0:
         cursor = cursor / nb_element
@@ -93,16 +107,16 @@ def create_image_with_categories_and_shapes(background_image, painting, r, curso
     for i in range(nb_element):
 
         current_class = MaskRCNNModel.class_names[r['class_ids'][i]]
-        print("Replace a ", current_class)
-        real_value = 0
+        # print("Replace a ", current_class)
+        real_value = 0.0
 
-        segment = getSegment(painting, r, i)
+        segment = get_segmented_mask(painting, r, i)
         target_image = segment[r['rois'][i][0]: r['rois'][i][2], r['rois'][i][1]: r['rois'][i][3]]  # crop the image
 
-        # Pick object that best fit the hole
+        # Pick object that best fits the hole
         if target_image is not None:
             # get the image with the best shape
-            result_image, result = best_image(target_image, object_image_list_nested[current_class], cursor)
+            result_image, result, _ = best_image(target_image, object_image_list_nested[current_class], cursor)
             real_value += result
 
             replacement_object = Image.fromarray(result_image)  # convert to Image
@@ -129,7 +143,7 @@ def create_image_with_categories(background_image, painting, r, cursor):
     for i in range(r['class_ids'].size):
 
         current_class = MaskRCNNModel.class_names[r['class_ids'][i]]
-        print("Replace a ", current_class)
+        # print("Replace a ", current_class)
 
         # get image in the painting (as done when generating images)
         # Pick a random object
@@ -171,9 +185,13 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
     if nb_paintings != 1:
         cursor_step = 20 / (nb_paintings - 1)  # cursor values in [0,20]
 
+    '''
     list_of_methods = [create_image_with_shapes] * nb_paintings + [create_image_with_categories_and_shapes] * nb_paintings + [
         create_image_with_categories] * nb_paintings
     method_names = ["shapes", "shapes and categories", "categories"]
+    '''
+    list_of_methods = [create_image_with_categories_and_shapes] * nb_paintings
+    method_names = ["shapes and categories"]
 
     if not os.path.exists(path_to_results):
         os.mkdir(path_to_results)
@@ -181,7 +199,6 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
     # Run the model on the painting.
     model = MaskRCNNModel().model
 
-    image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
     painting_file_list = [y for x in [glob(path_to_paintings + '/*.%s' % ext) for ext in image_extensions] for y in x]
 
     # List of available background images
@@ -247,8 +264,8 @@ def create_case_study(path_to_paintings: str, path_objects_to_replace: str,
 
 
 if __name__ == "__main__":
-    painting_dir = './Paintings/'
-    background_dir = './BaseImages/paysages décors fonds'
+    painting_dir = default_painting_folder
+    background_dir = default_background_folder
     output_dir = './NewRésultats2/'
 
-    create_case_study(painting_dir, './CroppedAndVectorizedImages/animaux/', background_dir, output_dir)
+    create_case_study(painting_dir, default_substitute_folder, background_dir, output_dir)
