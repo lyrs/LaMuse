@@ -1,11 +1,12 @@
 import setuptools
+from LaMuse.Musesetup import version_number
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="LaMuse", 
-    version="0.2.1",
+    version=version_number,
     author="Bart Lamiroy",
     author_email="Bart.Lamiroy@univ-reims.fr",
     description="LaMuse, deep learning for painters",
