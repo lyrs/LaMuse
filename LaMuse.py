@@ -1,32 +1,17 @@
-import sys
 from glob import glob
-import os
+import cv2
 import errno
 import argparse
 import pkg_resources
 
 import PySimpleGUI as sg
+
 from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
-from .tools.fast_style_transfer import save_image
-
-import cv2
-
+from .tools.fast_style_transfer import apply_style_transfer
 from .tools.watermarking import add_watermark
 
-segmentation_suffix = "_objets"
-
-# @Todo: Currently configuration data is packed with the software and stored in the /bin or /lib
-#   directory after installation/deployment. This should be changed to a more convenient location
-default_image_folder = f'{os.path.dirname(__file__)}/BaseImages'
-default_background_folder = f'{os.path.dirname(__file__)}/Backgrounds'
-default_painting_folder = f'{os.path.dirname(__file__)}/Paintings'
-default_interpretation_folder = './Interpretations'
-default_watermark_file = f'{os.path.dirname(__file__)}/Watermark.png'
-
-mask_rcnn_config_file = f'{os.path.dirname(__file__)}/mask_rcnn_coco.h5'
-
-version_number = '0.1.0'
+from .Musesetup import *
 
 sg.theme('DarkAmber')
 
@@ -50,11 +35,11 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     :return:
     """
     ##
-    # The following function will go over all images in 'default_painting_folder' and use
+    # The following function will go over all images in 'painting_folder' and use
     # the Mask_RCNN neural network to find identifiable objects.
-    # It will then substitute these objects with similar ones stored in the 'default_substitute_folder'
-    # folder, and replace the background with a random image chosen from 'default_background_folder'
-    # The results are stored in 'dafault_interpretation_folder'
+    # It will then substitute these objects with similar ones stored in the 'substitute_folder'
+    # folder, and replace the background with a random image chosen from 'background_folder'
+    # The results are stored in 'interpretation_folder'
     ##
     if args.verbose:
         print("   Calling create_case_study")
@@ -69,7 +54,6 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     # Go over all images in 'default_painting_folder' and the corresponding images in
     # 'default_interpretation_folder' and apply a style transfer.
     ##
-    image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
     painting_file_list = [y for x in [glob(painting_folder + '/*.%s' % ext) for ext in image_extensions]
                           for y in x]
 
@@ -88,11 +72,10 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             # adopt the same style as 'painting'
             # The result is stored in 'interpretation'
             ##
-
             if args.verbose:
                 print(f'    Saving {interpretation}')
 
-            save_image(interpretation, painting, interpretation)
+            apply_style_transfer(interpretation, painting, interpretation)
 
             if args.verbose:
                 print(f'    Done saving {interpretation}')
@@ -200,8 +183,6 @@ if __name__ == "__main__":
                     default_painting_folder = values[1]
                 if values[2]:
                     default_background_folder = values[2]
-                else:
-                    default_background_folder = default_image_folder + '/Backgrounds'
 
                 sg.Popup("La génération de cas d'étude a commencé, en fonction du nombre de peintures fournies ceci "
                          "peut prendre un certain temps", title="Création démarrée", non_blocking=True)

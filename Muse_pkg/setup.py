@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="LaMuse", 
-    version="0.1.0",
+    version="0.2.1",
     author="Bart Lamiroy",
     author_email="Bart.Lamiroy@univ-reims.fr",
     description="LaMuse, deep learning for painters",

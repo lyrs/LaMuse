@@ -15,25 +15,27 @@ from keras.preprocessing.image import img_to_array
 def generate_images(source_path: str, destination_path: str) -> None:
     """
     :param source_path: top level directory path in which to recursively select all images
-    :param destination_path: destination path in which to generate image masks of detected objects
+    :param destination_path: destination path in which to store generated image masks of detected objects
     :return:
 
-    generate_images recursively iterates over all images in source_path and generates masks of detected objects
-    in destination_path.
+    `generate_images()` recursively iterates over all images in `source_path` and generates masks of detected objects
+    that are subsequently stored in in `destination_path`.
 
-    If destination_path: does not exist it is created.
+    If `destination_path` does not exist it is created.
     """
     assert source_path != ""
     assert destination_path != ""
 
-    image_extensions = ["jpg", "gif", "png", "tga"]
-    image_list = [y for x in [glob(source_path + '/**/*.%s' % ext, recursive=True) for ext in image_extensions] for y in x]
+    # @TODO these image extensions should be imported from `Musesetup.py`
+    image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
+    image_list = [y for x in [glob(f'{source_path}/**/*.{ext}', recursive=True) for ext in image_extensions] for y in
+                  x]
 
     if not os.path.exists(destination_path):
         os.mkdir(destination_path)
 
     model = MaskRCNNModel().model
-    compteur = 0
+    counter = 0
 
     # Iterate over all files in source_path
     # @Todo : verify that all files are effectively images, handle errors
@@ -67,7 +69,7 @@ def generate_images(source_path: str, destination_path: str) -> None:
         if r['class_ids'].size > 0:
 
             for c in r['class_ids']:
-                new_path = destination_path+'/'+MaskRCNNModel.class_names[c]
+                new_path = destination_path + '/' + MaskRCNNModel.class_names[c]
                 if not os.path.exists(new_path):
                     os.mkdir(new_path)
 
@@ -78,37 +80,50 @@ def generate_images(source_path: str, destination_path: str) -> None:
                 if box_area < min_area:
                     break
 
-                masked_image = np.full(img.shape, (0, 0, 0), np.uint8)
-
-                for c in range(3):
-                    masked_image[:, :, c] = np.where(r['masks'][:, :, obj_idx] == 1,
-                                                     img[:, :, c], 0)
-
-                #segmented_image = Image.new("RGBA", masked_image)
-
-                ##
-                # following lines adapted from https://stackoverflow.com/questions/54703674/how-do-i-make-my-numpy-image-take-an-alpha-channel-value-in-python
-                ##
-
-                h, w = masked_image.shape[:2]
-                # Adding an alpha layer to masked_image
-                masked_image = np.dstack((masked_image, np.zeros((h, w), dtype=np.uint8) + 255))
-                # Make mask of black pixels - mask is True where image is black
-                mBlack = (masked_image[:, :, 0:3] == [0, 0, 0]).all(2)
-                # Make all pixels matched by mask into transparent ones
-                masked_image[mBlack] = (0, 0, 0, 0)
-
+                masked_image = get_segmented_mask(img, r, obj_idx)
                 segmented_image = Image.fromarray(masked_image)
 
-                # print(filename, r['masks'][:, :, 0].shape[0], r['masks'][:, :, 0].shape[1], MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(compteur) + "_" + str(obj_idx) + ".png")
+                # print(filename, r['masks'][:, :, 0].shape[0], r['masks'][:, :, 0].shape[1], MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(counter) + "_" + str(obj_idx) + ".png")
 
                 # Good dimensions crop([1], [0], [3], [2]) !
                 segmented_image.crop(
                     (box_dimensions[1], box_dimensions[0], box_dimensions[3], box_dimensions[2])).save(
-                     destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(compteur) + "_" +
-                            str(obj_idx) + ".png")
+                    destination_path + "/" + MaskRCNNModel.class_names[r['class_ids'][obj_idx]] + "/" + str(
+                        counter) + "_" +
+                    str(obj_idx) + ".png")
 
-            compteur += 1
+            counter += 1
+
+
+def get_segmented_mask(img: np.ndarray, r: dict, index: int) -> np.ndarray:
+    """
+    Retrieve the mask for the element at `index` in the image `img` with the result array `r`
+
+    :param img: image from which to retrieve the shape mask
+    :param r: pre-computed segementation results
+    :param index: index of segmented shape to retrieve
+    :return: mask image of segmented shape with background pixels set to (0, 0, 0, 0)
+    """
+    masked_image = np.full(img.shape, (0, 0, 0), np.uint8)
+
+    for c in range(3):
+        masked_image[:, :, c] = np.where(r['masks'][:, :, index] == 1,
+                                         img[:, :, c], 0)
+
+    # segmented_image = Image.new("RGBA", masked_image)
+
+    ##
+    # following lines adapted from https://stackoverflow.com/questions/54703674/how-do-i-make-my-numpy-image-take-an-alpha-channel-value-in-python
+    ##
+
+    h, w = masked_image.shape[:2]
+    # Adding an alpha layer to masked_image
+    masked_image = np.dstack((masked_image, np.zeros((h, w), dtype=np.uint8) + 255))
+    # Make mask of black pixels - mask is True where image is black
+    mBlack = (masked_image[:, :, 0:3] == [0, 0, 0]).all(2)
+    # Make all pixels matched by mask into transparent ones
+    masked_image[mBlack] = (0, 0, 0, 0)
+    return masked_image
 
 
 if __name__ == "__main__":

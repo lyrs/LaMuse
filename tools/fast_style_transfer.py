@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_hub as tf_hub
 import PIL
+import os
 from matplotlib import pyplot as plt
 
 
@@ -72,7 +73,7 @@ def new_load_img(path_to_img: str, max_dim: int = 512):
     return image
 
 
-def save_image(path_content: str, path_style: str, path_to_save: str, scale_image: bool = True) -> None:
+def apply_style_transfer(path_content: str, path_style: str, path_to_save: str, scale_image: bool = True) -> None:
     """
     :param path_content:
     :param path_style:
@@ -100,6 +101,7 @@ def save_image(path_content: str, path_style: str, path_to_save: str, scale_imag
     style_image = style_image.astype(np.float32)[np.newaxis, ...] / 255.
 
     # Load image stylization module.
+    os.environ['TFHUB_CACHE_DIR'] = './tf_cache' #Any folder that you can access
     hub_module = tf_hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
 
     # Stylize image.
