@@ -15,8 +15,12 @@ import cv2
 
 
 def add_watermark(img: np.ndarray, path_to_watermark: str = "./Watermark.png") -> np.ndarray:
-    imgHeight, imgWidth = img.shape[:2]
-    new_dim = (imgWidth, imgHeight)
+    return add_diagonal_watermark(img, path_to_watermark)
+
+
+def add_diagonal_watermark(img: np.ndarray, path_to_watermark: str = "./Watermark.png") -> np.ndarray:
+    img_height, img_width = img.shape[:2]
+    new_dim = (img_width, img_height)
 
     overlay = cv2.imread(path_to_watermark, cv2.IMREAD_UNCHANGED)
     if overlay is None or overlay.size == 0:
@@ -25,25 +29,24 @@ def add_watermark(img: np.ndarray, path_to_watermark: str = "./Watermark.png") -
     overlay = cv2.resize(overlay, new_dim, interpolation=cv2.INTER_AREA)
 
     # Extract the RGB channels
-    srcRGB = img[..., :3]
-    dstRGB = overlay[..., :3]
+    src_rgb = img[..., :3]
+    dst_rgb = overlay[..., :3]
 
     # Extract the alpha channels and normalise to range 0..1
-    srcA = img[..., 3] / 255.0
-    dstA = overlay[..., 3] / 255.0
+    src_alpha = img[..., 3] / 255.0
+    dst_alpha = overlay[..., 3] / 255.0
 
     # Work out resultant alpha channel
-    outA = srcA + dstA * (1 - srcA)
+    out_alpha = src_alpha + dst_alpha * (1 - src_alpha)
 
     # Work out resultant RGB
-    # outRGB = (srcRGB * srcA[..., np.newaxis] + dstRGB * srcA[..., np.newaxis] * (1 - dstA[..., np.newaxis])) / outA[
+    # out_rgb = (src_rgb * src_alpha[..., np.newaxis] + dst_rgb * src_alpha[..., np.newaxis] * (1 - dstA[..., np.newaxis])) / out_alpha[
     #    ..., np.newaxis]
-    new_srcRGB = srcRGB * (srcA-dstA)[..., np.newaxis]
-    new_dstRGB = (dstRGB * dstA[..., np.newaxis] + srcRGB * srcA[..., np.newaxis]) / (dstA + srcA)[..., np.newaxis]
-    outRGB = new_srcRGB + new_dstRGB * (1-(srcA-dstA))[..., np.newaxis]
+    new_src_rgb = src_rgb * (src_alpha - dst_alpha)[..., np.newaxis]
+    new_dst_rgb = (dst_rgb * dst_alpha[..., np.newaxis] + src_rgb * src_alpha[..., np.newaxis]) / (dst_alpha + src_alpha)[..., np.newaxis]
+    out_rgb = new_src_rgb + new_dst_rgb * (1 - (src_alpha - dst_alpha))[..., np.newaxis]
 
     # Merge RGB and alpha (scaled back up to 0..255) back into single image
-    outRGBA = np.dstack((outRGB, outA * 255)).astype(np.uint8)
+    out_rgba = np.dstack((out_rgb, out_alpha * 255)).astype(np.uint8)
 
-    return outRGBA
-
+    return out_rgba
