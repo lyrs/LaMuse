@@ -1,3 +1,13 @@
+#  Copyright (c) 2022. Bart Lamiroy (Bart.Lamiroy@univ-reims.fr) and subsequent contributors
+#  as per git commit history. All rights reserved.
+#
+#  La Muse, Leveraging Artificial Intelligence for Sparking Inspiration
+#  https://hal.archives-ouvertes.fr/hal-03470467/
+#
+#  This code is licenced under the GNU LESSER GENERAL PUBLIC LICENSE
+#  Version 3, 29 June 2007
+#
+
 import os
 
 # os.chdir('./Mask_RCNN')
@@ -191,8 +201,8 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
         create_image_with_categories] * nb_paintings
     method_names = ["shapes", "shapes and categories", "categories"]
     '''
-    list_of_methods = [create_image_with_categories] * nb_paintings
-    method_names = ["categories"]
+    list_of_methods = [create_image_with_categories, create_image_with_categories_and_shapes] * nb_paintings
+    method_names = ["categories", "categories-shapes"]
 
     if not os.path.exists(path_to_results):
         os.mkdir(path_to_results)
@@ -251,6 +261,8 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
             background_image = background_image.convert("RGBA")
 
             background_image, real_value = technic(background_image, painting, r, cursor)
+            if real_value is None:
+                real_value = -1.0
             # background_image, real_value = create_image_with_shapes(background_image, painting, r, cursor)
 
             # Save background_image.

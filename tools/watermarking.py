@@ -1,4 +1,14 @@
-# Inspired from https://www.analyticsvidhya.com/blog/2021/08/how-to-add-watermark-on-images-using-opencv-in-python/
+#  Copyright (c) 2022. Bart Lamiroy (Bart.Lamiroy@univ-reims.fr) and subsequent contributors
+#  as per git commit history. All rights reserved.
+#
+#  La Muse, Leveraging Artificial Intelligence for Sparking Inspiration
+#  https://hal.archives-ouvertes.fr/hal-03470467/
+#
+#  This code is licenced under the GNU LESSER GENERAL PUBLIC LICENSE
+#  Version 3, 29 June 2007
+#
+
+# Inspired by https://www.analyticsvidhya.com/blog/2021/08/how-to-add-watermark-on-images-using-opencv-in-python/
 
 import numpy as np
 import cv2
