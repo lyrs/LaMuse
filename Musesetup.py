@@ -12,7 +12,7 @@ import os
 
 version_number = '0.2.2'
 
-image_extensions = ["jpg", "gif", "png", "tga", "jpeg"]
+image_extensions = ["jpg", "gif", "png", "tga", "jpeg", "pgm"]
 
 
 segmentation_suffix = "_objets"

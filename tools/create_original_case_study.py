@@ -23,7 +23,7 @@ from .compare_images import best_image
 from .generate_segmented_pictures import get_segmented_mask
 from ..Musesetup import *
 
-from PIL import Image
+from PIL import Image, ImageOps
 import random
 import cv2
 import matplotlib.pyplot as plt
@@ -269,6 +269,10 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
             file_saved = path_to_results + painting_name + "-method=" + method_names[
                 j // nb_paintings] + "-value=" + '%.3f' % real_value + '.png'
             background_image = background_image.convert("RGB")
+            background_image.save(file_saved)
+            file_saved = path_to_results + painting_name + "-method=" + method_names[
+                j // nb_paintings] + "-value=" + '%.3f' % real_value + '.pgm'
+            background_image = ImageOps.grayscale(background_image)
             background_image.save(file_saved)
 
             print("Real value obtained : ", real_value)
