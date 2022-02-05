@@ -61,7 +61,7 @@ def load_img(path_to_img: str):
     return img
 
 
-def new_load_img(path_to_img: str, max_dim: int = 512):
+def load_and_rescale(path_to_img: str, max_dim: int = 512):
     """
     :param path_to_img:
     :param max_dim:
@@ -99,9 +99,9 @@ def apply_style_transfer(path_content: str, path_style: str, path_to_save: str, 
     # Optionally resize the images. It is recommended that the style image is about
     # 256 pixels (this size was used when training the style transfer network).
     # The content image can be any size.
-    content_image = new_load_img(path_content, max_dim)
+    content_image = load_and_rescale(path_content, max_dim)
     # style_image = plt.imread(path_style)
-    style_image = new_load_img(path_style, max_dim)
+    style_image = load_and_rescale(path_style, max_dim)
 
     if not scale_image:
         content_image = plt.imread(path_content)
@@ -111,7 +111,7 @@ def apply_style_transfer(path_content: str, path_style: str, path_to_save: str, 
     style_image = style_image.astype(np.float32)[np.newaxis, ...] / 255.
 
     # Load image stylization module.
-    os.environ['TFHUB_CACHE_DIR'] = './tf_cache' #Any folder that you can access
+    os.environ['TFHUB_CACHE_DIR'] = './tf_cache'  # Any folder that you can access
     hub_module = tf_hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
 
     # Stylize image.

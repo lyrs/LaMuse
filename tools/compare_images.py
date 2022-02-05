@@ -7,6 +7,8 @@
 #  This code is licenced under the GNU LESSER GENERAL PUBLIC LICENSE
 #  Version 3, 29 June 2007
 #
+import random
+from math import fabs, log
 
 import cv2
 import numpy as np
@@ -46,14 +48,25 @@ def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: flo
     best_contour = source_contour[0].copy()
     best_candidate = source_image
 
+    log_best_ratio = 10000
+    best_ratio_image = source_image
+
+    matched_shapes = {}
+
     found_best = False
     for candidate_image in candidate_image_list:
 
         if candidate_image.size == 0:
             continue
 
-        if (source_image.size / candidate_image.size) < 1 / threshold_ratio or \
-                (source_image.size / candidate_image.size) > threshold_ratio:
+        current_ratio = source_image.size / candidate_image.size
+        log_current_ratio = fabs(log(current_ratio))
+        if log_current_ratio < log_best_ratio:
+            log_best_ratio = log_current_ratio
+            best_ratio_image = candidate_image
+
+        if current_ratio < 1 / threshold_ratio or \
+                current_ratio > threshold_ratio:
             continue
 
         nb_ratio_correct += 1
@@ -64,13 +77,31 @@ def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: flo
             print("Found image without contours")
             continue
         ret = cv2.matchShapes(contours[0], source_contour[0], cv2.CONTOURS_MATCH_I1, 0.0)  # measure the difference
+        # @Todo this is an ugly hack !! All contours should be handled, not just the first one
         diff = abs(ret - cursor)
+        matched_shapes[diff] = (candidate_image, contours[0].copy())
+
+        # =====
+        # This is legacy code kept for reference ... of no further use
         if diff < best or not found_best:  # find best
             best = diff
             found_best = True
             # @Todo this is an ugly hack !! All contours should be handled, not just the first one
             best_contour = contours[0].copy()
             best_candidate = candidate_image
+        # =====
+
+    random_scope = max(len(matched_shapes) * 0.05, 10)
+    random_scope = int(min(float(len(matched_shapes)), random_scope))
+
+    sorted_keys = sorted(matched_shapes.keys())
+    sorted_scope = sorted_keys[:random_scope]
+    random_index = random.choice(sorted_scope)
+
+    random_item = matched_shapes[random_index]
+    best_contour = random_item[1]
+    best_candidate = random_item[0]
+    best = random_index
 
     # rotate the image to have the same orientation
     res = apply_orientation(source_contour, source_image, best_contour, best_candidate)
