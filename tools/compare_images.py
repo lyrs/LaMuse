@@ -16,7 +16,7 @@ import numpy as np
 from .barycentre import barycentre
 
 
-def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: float, threshold_ratio: float = 7.0) -> tuple:
+def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: float, threshold_ratio: float = 3.0) -> tuple:
     """
     from https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
 
