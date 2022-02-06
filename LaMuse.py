@@ -17,7 +17,7 @@ import pkg_resources
 import PySimpleGUI as sg
 
 from .tools.generate_segmented_pictures import generate_images
-from .tools.create_original_case_study import create_case_study
+from .tools.create_original_case_study import create_collage
 from .tools.fast_style_transfer import apply_style_transfer
 from .tools.watermarking import add_watermark
 
@@ -52,13 +52,13 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     # The results are stored in 'interpretation_folder'
     ##
     if args.verbose:
-        print("   Calling create_case_study")
+        print("   Calling create_collage")
 
-    create_case_study(painting_folder, substitute_folder,
-                      background_folder, interpretation_folder, 1)
+    create_collage(painting_folder, substitute_folder,
+                   background_folder, interpretation_folder, 1)
 
     if args.verbose:
-        print("   Done calling create_case_study")
+        print("   Done calling create_collage")
 
     ##
     # Go over all images in 'default_painting_folder' and the corresponding images in

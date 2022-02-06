@@ -16,7 +16,8 @@ import numpy as np
 from .barycentre import barycentre
 
 
-def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: float, threshold_ratio: float = 3.0) -> tuple:
+def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: float,
+               threshold_ratio: float = 3.0) -> tuple:
     """
     from https://docs.opencv.org/master/d5/d45/tutorial_py_contours_more_functions.html
 
@@ -35,8 +36,8 @@ def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: flo
     best_index = -1  # index of the best image
     img_gray = cv2.cvtColor(transparancy_mask_to_BW(source_image), cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(img_gray, 127, 255, 0)
-    source_contour, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL,
-                                                 cv2.CHAIN_APPROX_NONE)  # contour of the source_image
+    source_contour, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL,
+                                         cv2.CHAIN_APPROX_NONE)  # contour of the source_image
     if len(source_contour) == 0:
         try:
             raise ValueError
@@ -72,7 +73,7 @@ def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: flo
         nb_ratio_correct += 1
         img_gray_temp = cv2.cvtColor(transparancy_mask_to_BW(candidate_image), cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(img_gray_temp, 127, 255, 0)
-        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)  # contour of the image
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)  # contour of the image
         if len(contours) == 0:
             print("Found image without contours")
             continue
@@ -91,17 +92,26 @@ def best_image(source_image: np.ndarray, candidate_image_list: list, cursor: flo
             best_candidate = candidate_image
         # =====
 
-    random_scope = max(len(matched_shapes) * 0.05, 10)
-    random_scope = int(min(float(len(matched_shapes)), random_scope))
+    nb_matched_shapes = len(matched_shapes)
 
-    sorted_keys = sorted(matched_shapes.keys())
-    sorted_scope = sorted_keys[:random_scope]
-    random_index = random.choice(sorted_scope)
+    if nb_matched_shapes > 0:
+        random_scope = int(max(nb_matched_shapes * 0.05, 10))
+        random_scope = min(nb_matched_shapes, random_scope)
 
-    random_item = matched_shapes[random_index]
-    best_contour = random_item[1]
-    best_candidate = random_item[0]
-    best = random_index
+        sorted_keys = sorted(matched_shapes.keys())
+        sorted_scope = sorted_keys[:random_scope]
+        random_index = random.choice(sorted_scope)
+
+        random_item = matched_shapes[random_index]
+        best_contour = random_item[1]
+        best_candidate = random_item[0]
+        best = random_index
+    else:
+        best_candidate = best_ratio_image
+        img_gray_temp = cv2.cvtColor(transparancy_mask_to_BW(best_candidate), cv2.COLOR_BGR2GRAY)
+        ret, thresh = cv2.threshold(img_gray_temp, 127, 255, 0)
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        best_contour = contours[0].copy()
 
     # rotate the image to have the same orientation
     res = apply_orientation(source_contour, source_image, best_contour, best_candidate)

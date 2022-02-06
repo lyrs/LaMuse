@@ -10,7 +10,7 @@
 
 import os
 
-version_number = '0.2.2'
+version_number = '0.2.3-beta'
 
 image_extensions = ["jpg", "gif", "png", "tga", "jpeg", "pgm"]
 

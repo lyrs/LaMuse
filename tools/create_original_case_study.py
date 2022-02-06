@@ -11,14 +11,17 @@
 import os
 
 # os.chdir('./Mask_RCNN')
+import shutil
 from glob import glob
+from math import fabs, log
 
+from numpy import Inf
 from tensorflow.python.keras.backend import reset_uids
 
 # import tensorflow.compat.v1 as tf
 
 # tf.disable_v2_behavior()
-
+from tools.fast_style_transfer import apply_style_transfer
 from .compare_images import best_image
 from .generate_segmented_pictures import get_segmented_mask
 from ..Musesetup import *
@@ -156,17 +159,25 @@ def create_image_with_categories(background_image, painting, r, cursor):
         current_class = MaskRCNNModel.class_names[r['class_ids'][i]]
         # print("Replace a ", current_class)
 
-        # get image in the painting (as done when generating images)
-        # Pick a random object
-        try:
-            replacement_object = Image.fromarray(random.choice(object_image_list_nested[current_class]))
-        except IndexError:
-            print("Cannot find", current_class)  # , "in", path_to_substitute_objects, "for", painting_name)
-            break
         # Définition des dimensions et du placement du futur objet à coller
         original_object_bbox = (r['rois'][i][1], r['rois'][i][0], r['rois'][i][3], r['rois'][i][2])
         original_object_width = original_object_bbox[2] - original_object_bbox[0]
         original_object_height = original_object_bbox[3] - original_object_bbox[1]
+        original_object_size = original_object_width * original_object_height
+
+        # get image in the painting (as done when generating images)
+        # Pick a random object
+        try:
+            # @Todo: transform hard-coded 3.0 value to a parameter
+            similar_objects = [i for i in object_image_list_nested[current_class] if
+                               fabs(log(i.size / original_object_size)) < 3.0]
+            if len(similar_objects) == 0:
+                similar_objects = object_image_list_nested[current_class]
+
+            replacement_object = Image.fromarray(random.choice(similar_objects))
+        except IndexError:
+            print("Cannot find", current_class)  # , "in", path_to_substitute_objects, "for", painting_name)
+            break
 
         # Resizing replacement_object to original_object dimensions.
         replacement_object = replacement_object.resize((original_object_width, original_object_height),
@@ -177,10 +188,10 @@ def create_image_with_categories(background_image, painting, r, cursor):
     return background_image, 0
 
 
-def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
-                      path_to_background_images: str,
-                      path_to_results: str,
-                      nb_paintings: int = 3) -> None:
+def create_collage(path_to_paintings: str, path_to_substitute_objects: str,
+                   path_to_background_images: str,
+                   path_to_results: str,
+                   nb_paintings: int = 3) -> None:
     """
     :param path_to_paintings:
     :param path_to_substitute_objects:
@@ -201,8 +212,8 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
         create_image_with_categories] * nb_paintings
     method_names = ["shapes", "shapes and categories", "categories"]
     '''
-    list_of_methods = [create_image_with_categories_and_shapes] * nb_paintings
-    method_names = ["categories-shapes"]
+    list_of_methods = [create_image_with_categories] * nb_paintings
+    method_names = ["categories"]
 
     if not os.path.exists(path_to_results):
         os.mkdir(path_to_results)
@@ -259,21 +270,30 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
             # Resize the background image with the size of painting.
             background_image = background_image.resize((painting_width, painting_height), Image.ANTIALIAS)
             background_image = background_image.convert("RGBA")
+            original_background_image = background_image
 
             background_image, real_value = technic(background_image, painting, r, cursor)
             if real_value is None:
                 real_value = -1.0
+            elif real_value > 1000.0:
+                real_value = Inf
             # background_image, real_value = create_image_with_shapes(background_image, painting, r, cursor)
 
             # Save background_image.
-            file_saved = path_to_results + painting_name + "-method=" + method_names[
-                j // nb_paintings] + "-value=" + '%.3f' % real_value + '.png'
+            file_saved = f'{path_to_results}{painting_name}-method={method_names[j // nb_paintings]}-value=' + '%.3f' % real_value + '.png'
             background_image = background_image.convert("RGB")
             background_image.save(file_saved)
             file_saved = path_to_results + painting_name + "-method=" + method_names[
                 j // nb_paintings] + "-value=" + '%.3f' % real_value + '.pgm'
             background_image = ImageOps.grayscale(background_image)
             background_image.save(file_saved)
+
+            new_file_saved = path_to_results + painting_name + "-method=" + method_names[
+                j // nb_paintings] + "-value=" + '%.3f' % real_value + '-V2.png'
+            apply_style_transfer(file_saved, background_image_name, new_file_saved)
+            new_file_copy = path_to_results + 'No-' + painting_name + "-method=" + method_names[
+                j // nb_paintings] + "-value=" + '%.3f' % real_value + '-V2.png'
+            shutil.copyfile(new_file_saved, new_file_copy)
 
             print("Real value obtained : ", real_value)
             cursor += cursor_step  # to have different result for an image
@@ -285,4 +305,4 @@ if __name__ == "__main__":
     background_dir = default_background_folder
     output_dir = './NewRésultats2/'
 
-    create_case_study(painting_dir, default_substitute_folder, background_dir, output_dir)
+    create_collage(painting_dir, default_substitute_folder, background_dir, output_dir)
