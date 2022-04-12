@@ -10,7 +10,7 @@
 
 import os
 
-version_number = '0.2.2'
+version_number = '0.2.3'
 
 image_extensions = ["jpg", "gif", "png", "tga", "jpeg", "pgm"]
 
@@ -28,6 +28,8 @@ default_substitute_folder = default_image_folder + segmentation_suffix
 default_painting_folder = f'{default_base_folder}/Paintings'
 default_interpretation_folder = './Interpretations'
 default_watermark_file = f'{default_base_folder}/Watermark.png'
+default_trace_file = f'lamuse_tuples.json'
+
 
 mask_rcnn_config_file = f'{default_base_folder}/mask_rcnn_coco.h5'
 

@@ -12,6 +12,7 @@ from glob import glob
 import cv2
 import errno
 import argparse
+import json
 import pkg_resources
 
 import PySimpleGUI as sg
@@ -54,17 +55,20 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     if args.verbose:
         print("   Calling create_case_study")
 
-    create_case_study(painting_folder, substitute_folder,
-                      background_folder, interpretation_folder, 1)
+    trace_log = create_case_study(painting_folder, substitute_folder, background_folder, interpretation_folder, 1)
 
     if args.verbose:
         print("   Done calling create_case_study")
+
+    if args.trace_file:
+        with open(args.trace_file, 'w') as f:
+            f.write(json.dumps(trace_log))
 
     ##
     # Go over all images in 'default_painting_folder' and the corresponding images in
     # 'default_interpretation_folder' and apply a style transfer.
     ##
-    painting_file_list = [y for x in [glob(painting_folder + '/*.%s' % ext) for ext in image_extensions]
+    painting_file_list = [y for x in [glob(f'{painting_folder}/*.{ext}') for ext in image_extensions]
                           for y in x]
 
     for painting in painting_file_list:
@@ -132,6 +136,10 @@ if __name__ == "__main__":
     parser.add_argument('--version', action='version', version='%(prog)s {}'.format(version_number))
     parser.add_argument("--watermark", "-wm", type=str, nargs='?', const=default_watermark_file,
                         help='watermark file (defaults to "' + default_watermark_file + '" if non specified)')
+
+    parser.add_argument("--trace_file", "-tr", type=str, nargs='?',
+                        help=f'output file for tracing all operations and their parameters (defaults to "{default_trace_file}" if non specified)',
+                        const=default_trace_file)
 
     args = parser.parse_args()
 
