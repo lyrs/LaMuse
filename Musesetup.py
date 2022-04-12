@@ -10,13 +10,17 @@
 
 import os
 
-version_number = '0.2.3'
-
 image_extensions = ["jpg", "gif", "png", "tga", "jpeg", "pgm"]
 
 
 segmentation_suffix = "_objets"
 default_base_folder = os.path.dirname(__file__)
+
+
+with open(f'{default_base_folder}/version_number') as vn:
+   version_number = vn.readline()
+
+# version_number = '0.2.3'
 
 print(f"Default execution directory = {default_base_folder}")
 

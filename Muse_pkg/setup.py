@@ -1,7 +1,11 @@
 import setuptools
-from LaMuse.Musesetup import version_number
 
-with open("README.md", "r") as fh:
+#from LaMuse.Musesetup import version_number
+
+with open("LaMuse/version_number") as vn:
+   version_number = vn.readline()
+
+with open("LaMuse/README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -20,5 +24,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    package_data={'LaMuse': ['mask_rcnn_coco.h5', 'BaseImages_objets/*/*png', 'Paintings/*', 'Watermark.png']},
+    package_data={'LaMuse': ['mask_rcnn_coco.h5', 'BaseImages_objets/*/*png', 'Paintings/*', 'Watermark.png', 'version_number', 'README.md']},
 )
