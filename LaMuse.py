@@ -55,7 +55,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     if args.verbose:
         print("   Calling create_case_study")
 
-    trace_log = create_case_study(painting_folder, substitute_folder, background_folder, interpretation_folder, 1)
+    trace_log = create_case_study(painting_folder, substitute_folder, background_folder, interpretation_folder, 1, args.bw)
 
     if args.verbose:
         print("   Done calling create_case_study")
@@ -89,7 +89,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             if args.verbose:
                 print(f'    Saving {interpretation}')
 
-            apply_style_transfer(interpretation, painting, interpretation)
+            apply_style_transfer(interpretation, painting, interpretation, args.rescale)
 
             if args.verbose:
                 print(f'    Done saving {interpretation}')
@@ -132,7 +132,9 @@ if __name__ == "__main__":
                         default=[default_image_folder + segmentation_suffix])
     parser.add_argument("--demo", action='store_true', help='Run in demo mode, reducing features to bare minimum')
     parser.add_argument("--nogui", action='store_true', help='Run in no-gui mode')
+    parser.add_argument("-bw", action='store_true', help='Add greyscale filter')
     parser.add_argument("--verbose", action='store_true', help='Display trace messages')
+    parser.add_argument("--rescale", action='store_true', help='Remove rescaling before applying style transfer')
     parser.add_argument('--version', action='version', version='%(prog)s {}'.format(version_number))
     parser.add_argument("--watermark", "-wm", type=str, nargs='?', const=default_watermark_file,
                         help='watermark file (defaults to "' + default_watermark_file + '" if non specified)')

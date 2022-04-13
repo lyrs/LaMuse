@@ -180,7 +180,8 @@ def create_image_with_categories(background_image, painting, r, cursor):
 def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
                       path_to_background_images: str,
                       path_to_results: str,
-                      nb_paintings: int = 3) -> dict:
+                      nb_paintings: int = 3,
+                      bw_convert = False) -> dict:
     """
     :param path_to_paintings:
     :param path_to_substitute_objects:
@@ -276,13 +277,15 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
             # background_image, real_value = create_image_with_shapes(background_image, painting, r, cursor)
 
             # Save background_image.
-            file_saved = path_to_results + painting_name + "-method=" + method_names[
-                j // nb_paintings] + "-value=" + '%.3f' % real_value + '.png'
             background_image = background_image.convert("RGB")
-            background_image.save(file_saved)
-            file_saved = path_to_results + painting_name + "-method=" + method_names[
+            if not bw_convert:
+                file_saved = path_to_results + painting_name + "-method=" + method_names[
+                    j // nb_paintings] + "-value=" + '%.3f' % real_value + '.png'
+            else:
+                file_saved = path_to_results + painting_name + "-method=" + method_names[
                 j // nb_paintings] + "-value=" + '%.3f' % real_value + '.pgm'
-            background_image = ImageOps.grayscale(background_image)
+                background_image = ImageOps.grayscale(background_image)
+
             background_image.save(file_saved)
 
             print("Real value obtained : ", real_value)

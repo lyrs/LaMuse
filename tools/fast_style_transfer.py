@@ -61,7 +61,7 @@ def load_img(path_to_img: str):
     return img
 
 
-def new_load_img(path_to_img: str, max_dim: int = 512):
+def new_load_img(path_to_img: str, max_dim: int = None):
     """
     :param path_to_img:
     :param max_dim:
@@ -71,15 +71,15 @@ def new_load_img(path_to_img: str, max_dim: int = 512):
     image = PIL.Image.open(path_to_img)
     image = image.convert("RGB")
 
-    shape = image.size
-    long_dim = max(shape)
-    scale = max_dim / long_dim
+    if max_dim:
+        shape = image.size
+        long_dim = max(shape)
+        scale = max_dim / long_dim
 
-    image = image.resize((int(shape[0] * scale), int(shape[1] * scale)), PIL.Image.ANTIALIAS)
-    # image.save(path_to_img + "_style.png")
+        image = image.resize((int(shape[0] * scale), int(shape[1] * scale)), PIL.Image.ANTIALIAS)
+
     # Make sure to remove transparency layer
     image = np.asarray(image)[:, :, :3]
-
     return image
 
 
@@ -99,19 +99,26 @@ def apply_style_transfer(path_content: str, path_style: str, path_to_save: str, 
     # Optionally resize the images. It is recommended that the style image is about
     # 256 pixels (this size was used when training the style transfer network).
     # The content image can be any size.
-    content_image = new_load_img(path_content, max_dim)
     # style_image = plt.imread(path_style)
     style_image = new_load_img(path_style, max_dim)
 
-    if not scale_image:
-        content_image = plt.imread(path_content)
+    if scale_image:
+        content_image = new_load_img(path_content, max_dim)
+    else:
+        content_image = new_load_img(path_content, None)
+
+
 
     # Convert to float32 numpy array, add batch dimension, and normalize to range [0, 1].
     content_image = content_image.astype(np.float32)[np.newaxis, ...] / 255.
     style_image = style_image.astype(np.float32)[np.newaxis, ...] / 255.
 
+    print(content_image.size)
+
+    # exit()
+
     # Load image stylization module.
-    os.environ['TFHUB_CACHE_DIR'] = './tf_cache' #Any folder that you can access
+    os.environ['TFHUB_CACHE_DIR'] = './tf_cache'  # Any folder that you can access
     hub_module = tf_hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylization-v1-256/2')
 
     # Stylize image.

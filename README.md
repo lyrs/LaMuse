@@ -10,6 +10,21 @@ https://trello.com/projets4122/home
 
 ## _Back_
 
+### Installation
+
+La façon la plus simple pour installer _Lamuse_ et de l'exécuter est de récupérer un package python `.whl` et de l'installer avec `pip`.
+
+Pour ce faire :
+1. Avoir installé Python3
+2. Télécharger la derniere version du `.whl`.
+3. Exécuter `python3 -m pip install <fichier.whl>`
+4. Installer tous les packages nécessaires à l'éxécution de _Lamuse_, tels que spécifiés dans le fichier `requirements.txt` disponible sur git : `python3 -m pip install -r requirements.txt`.
+
+Ensuite on peut exécuter _Lamuse_ avec la commande `python3 -m LaMuse.LaMuse`. L'option `--help` énumère tous les paramètres configurables.
+
+### Code
+
+
 Le code se trouve dans :
 
 - `LaMuse.py`
