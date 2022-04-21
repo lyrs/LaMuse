@@ -9,10 +9,18 @@
 #
 
 from glob import glob
+from tkinter import Image
+
+import numpy
 import cv2
 import errno
 import argparse
 import json
+
+#LuisV
+from tqdm import tqdm
+import PIL.Image
+from numpy import array
 
 import pkg_resources
 
@@ -70,7 +78,10 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     painting_file_list = [y for x in [glob(f'{painting_folder}/*.{ext}') for ext in image_extensions]
                           for y in x]
 
-    for painting in painting_file_list:
+    #for painting in painting_file_list:
+    #LuisV:
+    for painting in tqdm(painting_file_list):
+    
 
         if args.verbose:
             print("    Handling " + painting)
@@ -79,6 +90,12 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
                                     [glob(interpretation_folder + '/%s*.%s' % (os.path.basename(painting), ext))
                                      for ext in image_extensions]
                                     for y in x]
+        #LuisV
+        print(interpretation_file_list)
+        trace_log[painting]["colors_final"] = dict()
+        trace_log[painting]["colors_painting"] = dict()
+        trace_log[painting]["colors_background"] = dict()
+        
         for interpretation in interpretation_file_list:
             ##
             # The following function will apply a style transfer on 'interpretation' as to have it
@@ -88,8 +105,27 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             if args.verbose:
                 print(f'    Saving {interpretation}')
 
+            #LuisV
+            print("HEEEEEEYY")
+            print("interpretation", get_color_names(numpy.array(PIL.Image.open(interpretation) ) ) )
+            
+            #LuisV
+            trace_log[painting]["colors_background"][interpretation] = get_color_names(numpy.array(PIL.Image.open(interpretation) ) )
+            trace_log[painting]["colors_painting"][interpretation]  = get_color_names(numpy.array(PIL.Image.open(painting) ) )
+            
+
+
             final_image = apply_style_transfer(interpretation, painting, interpretation, args.rescale)
-            trace_log[painting] += f'{get_color_names(final_image)}'
+            #trace_log[painting] += f'{get_color_names(final_image)}'
+            #LuisV
+            trace_log[painting]["colors_final"][interpretation] = get_color_names(final_image)
+            
+            
+
+            #LuisV
+            print("final", get_color_names(final_image))
+            print("painting", get_color_names(numpy.array(PIL.Image.open(painting) ) ) )
+            print("OOOOOHHH")
 
             if args.verbose:
                 print(f'    Done saving {interpretation}')
@@ -104,7 +140,9 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
 
     if args.trace_file:
         with open(args.trace_file, 'w') as f:
-            f.write(json.dumps(trace_log))
+            #f.write(json.dumps(trace_log))
+            #LuisV
+            f.write(json.dumps(trace_log, indent= 2 ))
 
 
 if __name__ == "__main__":
