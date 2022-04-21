@@ -13,10 +13,12 @@ import cv2
 import errno
 import argparse
 import json
+
 import pkg_resources
 
 import PySimpleGUI as sg
 
+from .tools.color_palette import get_color_names
 from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import apply_style_transfer
@@ -55,14 +57,11 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     if args.verbose:
         print("   Calling create_case_study")
 
-    trace_log = create_case_study(painting_folder, substitute_folder, background_folder, interpretation_folder, 1, args.bw)
+    trace_log = create_case_study(painting_folder, substitute_folder, background_folder, interpretation_folder, 1,
+                                  args.bw)
 
     if args.verbose:
         print("   Done calling create_case_study")
-
-    if args.trace_file:
-        with open(args.trace_file, 'w') as f:
-            f.write(json.dumps(trace_log))
 
     ##
     # Go over all images in 'default_painting_folder' and the corresponding images in
@@ -89,7 +88,8 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             if args.verbose:
                 print(f'    Saving {interpretation}')
 
-            apply_style_transfer(interpretation, painting, interpretation, args.rescale)
+            final_image = apply_style_transfer(interpretation, painting, interpretation, args.rescale)
+            trace_log[painting] += f'{get_color_names(final_image)}'
 
             if args.verbose:
                 print(f'    Done saving {interpretation}')
@@ -98,9 +98,13 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
                 if args.verbose:
                     print(f'    Adding watermark {args.watermark}')
 
-                image = cv2.imread(interpretation, cv2.IMREAD_UNCHANGED)
-                image = add_watermark(image, args.watermark)
-                cv2.imwrite(interpretation, image)
+                final_image = cv2.imread(interpretation, cv2.IMREAD_UNCHANGED)
+                final_image = add_watermark(final_image, args.watermark)
+                cv2.imwrite(interpretation, final_image)
+
+    if args.trace_file:
+        with open(args.trace_file, 'w') as f:
+            f.write(json.dumps(trace_log))
 
 
 if __name__ == "__main__":

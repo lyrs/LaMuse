@@ -10,7 +10,7 @@
 
 import os
 
-image_extensions = ["jpg", "gif", "png", "tga", "jpeg", "pgm"]
+image_extensions = ["jpg", "gif", "png", "tga", "jpeg", "pgm", "pnm"]
 
 
 segmentation_suffix = "_objets"

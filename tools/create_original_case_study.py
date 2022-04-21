@@ -203,8 +203,8 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
         create_image_with_categories] * nb_paintings
     method_names = ["shapes", "shapes and categories", "categories"]
     '''
-    list_of_methods = [create_image_with_categories, create_image_with_categories_and_shapes] * nb_paintings
-    method_names = ["categories", "categories-shapes"]
+    list_of_methods = [create_image_with_categories] * nb_paintings
+    method_names = ["categories"]
 
     if not os.path.exists(path_to_results):
         os.mkdir(path_to_results)
@@ -278,13 +278,10 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
 
             # Save background_image.
             background_image = background_image.convert("RGB")
-            if not bw_convert:
-                file_saved = path_to_results + painting_name + "-method=" + method_names[
-                    j // nb_paintings] + "-value=" + '%.3f' % real_value + '.png'
-            else:
-                file_saved = path_to_results + painting_name + "-method=" + method_names[
-                j // nb_paintings] + "-value=" + '%.3f' % real_value + '.pgm'
-                background_image = ImageOps.grayscale(background_image)
+            file_saved = path_to_results + painting_name + "-method=" + method_names[
+                j // nb_paintings] + "-value=" + '%.3f' % real_value + '.pnm'
+            if bw_convert:
+               background_image = ImageOps.grayscale(background_image)
 
             background_image.save(file_saved)
 

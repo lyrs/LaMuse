@@ -1,3 +1,7 @@
+# Version 0.2.5
+
+- Extended features of `--log_file` output to include color information of global image
+
 # Version 0.2.4
 
 - Added execution option configuring black and white filtering (`-bw`)
