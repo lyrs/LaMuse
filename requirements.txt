@@ -16,3 +16,5 @@ Pygments==2.11.2
 pycocotools~=2.0.2
 PyYAML~=6.0
 Cython~=0.29.24
+
+tqdm==4.63.0
