@@ -76,8 +76,16 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     # Go over all images in 'default_painting_folder' and the corresponding images in
     # 'default_interpretation_folder' and apply a style transfer.
     ##
-    painting_file_list = [y for x in [glob(f'{painting_folder}/*.{ext}') for ext in image_extensions]
-                          for y in x]
+    
+    #painting_file_list = [y for x in [glob(f'{painting_folder}/*.{ext}', recursive=True) for ext in image_extensions]
+    #                      for y in x]
+    
+    # LuisV
+    # Get the list of all files in directory tree at given path
+    painting_file_list = list()
+    for (dirpath, dirnames, filenames) in os.walk(painting_folder):
+        painting_file_list += [os.path.join(dirpath, file) for file in filenames]
+    print(f">>>{len(painting_file_list)} paintings", painting_file_list)
 
     #for painting in painting_file_list:
     #LuisV:
@@ -86,11 +94,17 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
 
         if args.verbose:
             print("    Handling " + painting)
-
+        """
         interpretation_file_list = [y for x in
                                     [glob(interpretation_folder + '/%s*.%s' % (os.path.basename(painting), ext))
                                      for ext in image_extensions]
                                     for y in x]
+        """
+        #LuisV: support for subfolders
+        interpretation_file_list = list()
+        for (dirpath, dirnames, filenames) in os.walk(interpretation_folder):
+            interpretation_file_list += [os.path.join(dirpath, file) for file in filenames]
+
         #LuisV
         #print(interpretation_file_list)
         #trace_log[painting]["colors_final"] = dict()
@@ -121,9 +135,6 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             #LuisV
             #trace_log[painting]["colors_final"][interpretation] = get_color_names(final_image)
             
-            #LuisV
-            #trace_log[interpretation]["mash_up"] = (painting, background_image_path, interpretation) 
-
             #LuisV
             #print("final", get_color_names(final_image))
             #print("painting", get_color_names(numpy.array(PIL.Image.open(painting) ) ) )
