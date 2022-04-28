@@ -26,13 +26,14 @@ import pkg_resources
 
 import PySimpleGUI as sg
 
-from .tools.color_palette import get_color_names
+#from .tools.color_palette import get_color_names
 from .tools.generate_segmented_pictures import generate_images
 from .tools.create_original_case_study import create_case_study
 from .tools.fast_style_transfer import apply_style_transfer
 from .tools.watermarking import add_watermark
 
 from .Musesetup import *
+import pandas as pd
 
 sg.theme('DarkAmber')
 
@@ -91,10 +92,10 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
                                      for ext in image_extensions]
                                     for y in x]
         #LuisV
-        print(interpretation_file_list)
-        trace_log[painting]["colors_final"] = dict()
-        trace_log[painting]["colors_painting"] = dict()
-        trace_log[painting]["colors_background"] = dict()
+        #print(interpretation_file_list)
+        #trace_log[painting]["colors_final"] = dict()
+        #trace_log[painting]["colors_painting"] = dict()
+        #trace_log[painting]["colors_background"] = dict()
         
         for interpretation in interpretation_file_list:
             ##
@@ -106,26 +107,27 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
                 print(f'    Saving {interpretation}')
 
             #LuisV
-            print("HEEEEEEYY")
-            print("interpretation", get_color_names(numpy.array(PIL.Image.open(interpretation) ) ) )
+            #print("HEEEEEEYY")
+            #print("interpretation", get_color_names(numpy.array(PIL.Image.open(interpretation) ) ) )
             
             #LuisV
-            trace_log[painting]["colors_background"][interpretation] = get_color_names(numpy.array(PIL.Image.open(interpretation) ) )
-            trace_log[painting]["colors_painting"][interpretation]  = get_color_names(numpy.array(PIL.Image.open(painting) ) )
+            #trace_log[painting]["colors_background"][interpretation] = get_color_names(numpy.array(PIL.Image.open(interpretation) ) )
+            #trace_log[painting]["colors_painting"][interpretation]  = get_color_names(numpy.array(PIL.Image.open(painting) ) )
             
-
-
+            #LuisV
+            background_image_path = interpretation
             final_image = apply_style_transfer(interpretation, painting, interpretation, args.rescale)
             #trace_log[painting] += f'{get_color_names(final_image)}'
             #LuisV
-            trace_log[painting]["colors_final"][interpretation] = get_color_names(final_image)
+            #trace_log[painting]["colors_final"][interpretation] = get_color_names(final_image)
             
-            
+            #LuisV
+            #trace_log[interpretation]["mash_up"] = (painting, background_image_path, interpretation) 
 
             #LuisV
-            print("final", get_color_names(final_image))
-            print("painting", get_color_names(numpy.array(PIL.Image.open(painting) ) ) )
-            print("OOOOOHHH")
+            #print("final", get_color_names(final_image))
+            #print("painting", get_color_names(numpy.array(PIL.Image.open(painting) ) ) )
+            #print("OOOOOHHH")
 
             if args.verbose:
                 print(f'    Done saving {interpretation}')
@@ -143,6 +145,34 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
             #f.write(json.dumps(trace_log))
             #LuisV
             f.write(json.dumps(trace_log, indent= 2 ))
+        
+        # LuisV: create a csv file
+        output_csv = str(args.trace_file).replace(".json", "") + ".csv"
+        df = pd.DataFrame(columns=[
+            'image_file', 'method',         # mashup data
+            'painting_name', 'painting_contains',  # painting data
+            'background_name', 'background_colors', # background data
+            'painting_path', 'background_path', # paths
+            ])
+        for painting in trace_log.keys():
+            for mash_up_dict in trace_log[painting]["mash_ups"]:
+                row_dict = {
+                    'image_file': mash_up_dict["mash_up_path"],
+                    'method': mash_up_dict['method'],
+                    'painting_name': trace_log[painting]["painting_name"],
+                    'painting_path': trace_log[painting]["painting_path"],
+                    'painting_contains': trace_log[painting]["painting_contains"],
+                    'background_name': mash_up_dict['background_name'],
+                    'background_path': mash_up_dict['background_path'],
+                    'background_colors': mash_up_dict['background_colors'],
+                }
+
+                df = df.append(row_dict, ignore_index= True)
+        
+        #save csv
+        df.to_csv(output_csv)
+
+                
 
 
 if __name__ == "__main__":
