@@ -37,6 +37,7 @@ from .MaskRCNNModel import MaskRCNNModel
 
 #LuisV:
 from tqdm import tqdm
+from .color_palette import get_color_names
 
 # @Todo find out why there are global variables and how to (maybe) get rid of them
 # object_file_list = {}
@@ -252,6 +253,7 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
 
         #trace_log[painting_filename] = f'(painting_name,{painting_name})'
         #LuisV
+        trace_log[painting_filename]["painting_path"] = painting_filename
         trace_log[painting_filename]["painting_name"] = painting_name
 
         painting = load_img(painting_filename)
@@ -264,22 +266,31 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
 
         #LuisV
         detected_items_list = [MaskRCNNModel.class_names[class_id] for class_id in detected_items['class_ids'] ]
-        trace_log[painting_filename]["contains"] = detected_items_list
+        trace_log[painting_filename]["painting_contains"] = detected_items_list
         #for class_id in detected_items['class_ids']:
         #    trace_log[painting_filename] += f'(contains,{MaskRCNNModel.class_names[class_id]})'
 
         cursor = 0
         j = 0
+
+        print("Starting with painting ", painting_name)
         
         #LuisV
-        trace_log[painting_filename]['background_images'] = []
+        trace_log[painting_filename]['mash_ups'] = []
+        
+        # LuisV new line: new loop
+        for background_image_path in tqdm(background_file_list):
+        
+            # Generate a number of altered forms of painting for each technic
+            for technic in list_of_methods:
+                print("Interpretation number : ", j)
 
-        # Generate a number of altered forms of painting for each technic
-        for technic in list_of_methods:
-            print("Painting number : ", j)
 
-            # LuisV new line: new loop
-            for background_image_name in tqdm(background_file_list):
+                
+                # LuisV
+                background_image_name = os.path.basename(background_image_path)
+                print(">> background", background_image_name)
+
                 # Pick a random background image
                 # LuisV commented
                 #try:
@@ -288,11 +299,10 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
                 #    print(path_to_background_images + " is empty, taking initial image instead")
                 #    background_image_name = painting_filename
 
-                background_image = Image.open(background_image_name)
+                background_image = Image.open(background_image_path)
 
-                #trace_log[painting_filename] += f'(background_image,{background_image_name})'
-                #LuisV
-                trace_log[painting_filename]['background_images'].append(background_image_name)
+                #trace_log[painting_filename] += f'(background_image,{background_image_path})'
+
 
                 # Resize the background image with the size of painting.
                 background_image = background_image.resize((painting_width, painting_height), Image.ANTIALIAS)
@@ -305,12 +315,24 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
 
                 # Save background_image.
                 
-                #LuisV new line (adapted from previous version)                
-                file_saved = path_to_results + painting_name + "-method=" + method_names[
-                    j // (nb_paintings * len(background_file_list))] + "-value=" + '%.3f' % real_value + (
-                        "-background=" + os.path.split( background_image_name.split(".")[0] )[1]
+                #LuisV new line (adapted from previous version)
+                method_name = method_names[j // (nb_paintings * len(background_file_list))]
+                file_saved = path_to_results + painting_name + "-method=" + method_name + "-value=" + '%.3f' % real_value + (
+                        "-background=" + background_image_name
                     ) + '.png'
 
+                #LuisV
+                # get colors
+                background_colors = get_color_names(np.array(Image.open(background_image_path) ) )
+                trace_log[painting_filename]['mash_ups'].append(
+                    {
+                    'background_path': background_image_path,
+                    'background_name' : background_image_name,
+                    'method': method_name,
+                    'mash_up_path': file_saved,
+                    'background_colors' : background_colors
+                    }
+                    )
 
                 background_image = background_image.convert("RGB")
                 
