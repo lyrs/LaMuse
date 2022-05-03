@@ -194,7 +194,7 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
     :param nb_paintings:
     :return:
     """
-    path_to_results += '/'
+    path_to_results = path_to_results.rstrip("/")
     trace_log = {}
 
     cursor = 0
@@ -216,7 +216,10 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
     #method_names = ["categories"]
     #LuisV
     method_names = ["categories", "categories-shapes"]
-    
+        #make sure it is an absolute path
+    if not os.path.isabs(path_to_results):
+        path_to_results = os.path.join(os.getcwd(), path_to_results)
+
     if not os.path.exists(path_to_results):
         os.mkdir(path_to_results)
 
@@ -259,7 +262,7 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
     for painting_filename in tqdm(painting_file_list):
 
         print("\nPainting : ", painting_filename)
-        painting_name = os.path.basename(painting_filename).split(".")[0]
+        painting_name = os.path.basename(painting_filename).rsplit(".", 1)[0]
 
         #LuisV: new line
         trace_log[painting_filename] = dict()
@@ -302,7 +305,7 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
 
                 
                 # LuisV
-                background_image_name = os.path.basename(background_image_path).split(".")[0]
+                background_image_name = os.path.basename(background_image_path).rsplit(".", 1)[0]
                 print(">> background", background_image_name)
 
                 # Pick a random background image
@@ -323,7 +326,7 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
                 background_image = background_image.convert("RGBA")
 
                 background_image, real_value = technic(background_image, painting, detected_items, cursor)
-                if real_value is None:
+                if real_value is None or abs(real_value) > 100:
                     real_value = -1.0
                 # background_image, real_value = create_image_with_shapes(background_image, painting, r, cursor)
 
@@ -331,9 +334,11 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
                 
                 #LuisV new line (adapted from previous version)
                 method_name = method_names[j // (nb_paintings * len(background_file_list))]
-                file_saved = path_to_results + painting_name + "-method=" + method_name + "-value=" + '%.3f' % real_value + (
+
+                file_saved = painting_name + "-method=" + method_name + "-value=" + '%.3f' % real_value + (
                         "-background=" + background_image_name
                     ) + '.png'
+                file_saved = os.path.join(path_to_results, file_saved)
 
                 #LuisV
                 # get colors
