@@ -90,7 +90,8 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     #for painting in painting_file_list:
     #LuisV:
     for painting in tqdm(painting_file_list):
-    
+        
+        painting_name = os.path.basename(painting).rsplit(".", 1)[0]
 
         if args.verbose:
             print("    Handling " + painting)
@@ -103,7 +104,12 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
         #LuisV: support for subfolders
         interpretation_file_list = list()
         for (dirpath, dirnames, filenames) in os.walk(interpretation_folder):
-            interpretation_file_list += [os.path.join(dirpath, file) for file in filenames]
+            interpretation_file_list += [
+                os.path.join(dirpath, file) 
+                for file in filenames
+                if str(os.path.basename(file)).startswith(painting_name)
+                #painting_name in file
+                ]
 
         #LuisV
         #print(interpretation_file_list)
@@ -184,7 +190,10 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
         df.to_csv(output_csv)
 
                 
-
+def convert_to_absolute_path(path):
+    if not os.path.isabs(path):
+        path = os.path.join(os.getcwd(), path)        
+    return path
 
 if __name__ == "__main__":
 
@@ -233,6 +242,12 @@ if __name__ == "__main__":
     default_interpretation_folder = args.output_dir[0]
     default_substitute_folder = args.substitute_dir[0]
     default_background_folder = args.background_dir[0]
+
+    default_painting_folder = convert_to_absolute_path(default_painting_folder)
+    default_interpretation_folder = convert_to_absolute_path(default_interpretation_folder)
+    default_substitute_folder = convert_to_absolute_path(default_substitute_folder)
+    default_background_folder = convert_to_absolute_path(default_background_folder)
+ 
 
     print(default_painting_folder)
     print(default_interpretation_folder)
