@@ -85,7 +85,7 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
     painting_file_list = list()
     for (dirpath, dirnames, filenames) in os.walk(painting_folder):
         painting_file_list += [os.path.join(dirpath, file) for file in filenames]
-    print(f">>>{len(painting_file_list)} paintings", painting_file_list)
+    print(f">>>{len(painting_file_list)} paintings")
 
     #for painting in painting_file_list:
     #LuisV:
@@ -156,15 +156,22 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
                 final_image = cv2.imread(interpretation, cv2.IMREAD_UNCHANGED)
                 final_image = add_watermark(final_image, args.watermark)
                 cv2.imwrite(interpretation, final_image)
+    
+    #LuisV: the trace will be saved in a JSON and a CSV file
 
     if args.trace_file:
-        with open(args.trace_file, 'w') as f:
+
+        trace_file_path = (args.trace_file).rsplit(".", 1)[0]
+        trace_file_json_path = trace_file_path + ".json"
+        trace_file_csv_path = trace_file_path + ".csv"
+
+        with open(trace_file_json_path, 'w') as f:
             #f.write(json.dumps(trace_log))
             #LuisV
+            print("Saving JSON in ", trace_file_json_path)
             f.write(json.dumps(trace_log, indent= 2 ))
         
         # LuisV: create a csv file
-        output_csv = str(args.trace_file).replace(".json", "") + ".csv"
         df = pd.DataFrame(columns=[
             'image_file', 'method',         # mashup data
             'painting_name', 'painting_contains',  # painting data
@@ -187,7 +194,8 @@ def generate_full_case_study(painting_folder: str, substitute_folder: str,
                 df = df.append(row_dict, ignore_index= True)
         
         #save csv
-        df.to_csv(output_csv)
+        print("Saving JSON in ", trace_file_csv_path)
+        df.to_csv(trace_file_csv_path)
 
                 
 def convert_to_absolute_path(path):
@@ -234,6 +242,9 @@ if __name__ == "__main__":
     parser.add_argument("--trace_file", "-tr", type=str, nargs='?',
                         help=f'output file for tracing all operations and their parameters (defaults to "{default_trace_file}" if non specified)',
                         const=default_trace_file)
+    parser.add_argument("--all_backgrounds", "-all", action = 'store_true',
+                        help=f'use all the backgrounds')
+
 
     args = parser.parse_args()
 
@@ -247,12 +258,16 @@ if __name__ == "__main__":
     default_interpretation_folder = convert_to_absolute_path(default_interpretation_folder)
     default_substitute_folder = convert_to_absolute_path(default_substitute_folder)
     default_background_folder = convert_to_absolute_path(default_background_folder)
- 
+    all_backgrounds = args.all_backgrounds
 
     print(default_painting_folder)
     print(default_interpretation_folder)
     print(default_substitute_folder)
     print(default_background_folder)
+    if not all_backgrounds:
+        print("Backgrounds will be chosen at random")
+    else:
+        print("Using all backgrounds")
 
     # @TODO properly include stuff using pkg_resources
     if not os.path.isfile(mask_rcnn_config_file):
@@ -308,8 +323,12 @@ if __name__ == "__main__":
                 if args.verbose:
                     print("Calling full_case_study")
 
-                generate_full_case_study(default_painting_folder, default_substitute_folder, default_background_folder,
-                                         default_interpretation_folder)
+                generate_full_case_study(default_painting_folder, 
+                                        default_substitute_folder, 
+                                        default_background_folder,
+                                        default_interpretation_folder,
+                                        all_backgrounds = all_backgrounds
+                                        )
 
                 if args.verbose:
                     print("Done calling full_case_study")
