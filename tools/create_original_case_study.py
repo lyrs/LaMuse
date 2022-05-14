@@ -185,7 +185,9 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
                       path_to_background_images: str,
                       path_to_results: str,
                       nb_paintings: int = 3,
-                      bw_convert = False) -> dict:
+                      bw_convert = False,
+                      all_backgrounds = False,
+                      ) -> dict:
     """
     :param path_to_paintings:
     :param path_to_substitute_objects:
@@ -231,7 +233,7 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
     painting_file_list = list()
     for (dirpath, dirnames, filenames) in os.walk(path_to_paintings):
         painting_file_list += [os.path.join(dirpath, file) for file in filenames]
-    print(f">>>{len(painting_file_list)} paintings", painting_file_list)
+    print(f">>>{len(painting_file_list)} paintings")
     #painting_file_list = [y for x in [glob(f'{path_to_paintings}/*.{ext}') for ext in image_extensions] for y in x]
 
     # List of available background images
@@ -242,6 +244,7 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
     background_file_list = list()
     for (dirpath, dirnames, filenames) in os.walk(path_to_background_images):
         background_file_list += [os.path.join(dirpath, file) for file in filenames]
+    
 
     if len(object_image_list) == 0 or len(object_image_list_nested) == 0:
         print("Updating objects...")
@@ -294,9 +297,14 @@ def create_case_study(path_to_paintings: str, path_to_substitute_objects: str,
         
         #LuisV
         trace_log[painting_filename]['mash_ups'] = []
+        # if all_backgrounds=False, just choose a random background
+        if all_backgrounds:
+            effective_background_file_list = tqdm(background_file_list)
+        else:
+            effective_background_file_list = random.sample(background_file_list, 1)
         
         # LuisV new line: new loop
-        for background_image_path in tqdm(background_file_list):
+        for background_image_path in effective_background_file_list:
         
             # Generate a number of altered forms of painting for each technic
             for technic in list_of_methods:
