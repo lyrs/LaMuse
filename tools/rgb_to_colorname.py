@@ -596,7 +596,7 @@ static_names = [
     ["7B3801", "Red Beech"],
     ["7B3F00", "Cinnamon"],
     ["7B6608", "Yukon Gold"],
-    [#"7B7874", "Tapa"],
+    #["7B7874", "Tapa"],
     #["7B7C94", "Waterloo "],
     ["7B8265", "Flax Smoke"],
     ["7B9F80", "Amulet"],
